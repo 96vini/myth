@@ -2,24 +2,19 @@
 
 import * as React from "react"
 import {
-  ArrowUpCircleIcon,
-  BarChartIcon,
   CameraIcon,
-  ClipboardListIcon,
   DatabaseIcon,
   FileCodeIcon,
-  FileIcon,
   FileTextIcon,
-  FolderIcon,
   HelpCircleIcon,
-  LayoutDashboardIcon,
-  ListIcon,
+  Link,
+  NotepadText,
+  RectangleEllipsis,
   SearchIcon,
   SettingsIcon,
   UsersIcon,
+  Waypoints,
 } from "lucide-react"
-
-import { NavDocuments } from "@/components/nav-documents"
 import { NavMain } from "@/components/nav-main"
 import { NavSecondary } from "@/components/nav-secondary"
 import { NavUser } from "@/components/nav-user"
@@ -32,6 +27,8 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from "@/components/ui/sidebar"
+import Image from "next/image"
+import { useTheme } from "next-themes"
 
 const data = {
   user: {
@@ -41,30 +38,25 @@ const data = {
   },
   navMain: [
     {
-      title: "Dashboard",
-      url: "#",
-      icon: LayoutDashboardIcon,
+      title: "Workflow",
+      url: "/workflow",
+      icon: Waypoints,
     },
     {
-      title: "Lifecycle",
+      title: "Links",
       url: "#",
-      icon: ListIcon,
+      icon: Link,
     },
     {
-      title: "Analytics",
+      title: "Credentials",
       url: "#",
-      icon: BarChartIcon,
+      icon: RectangleEllipsis,
     },
     {
-      title: "Projects",
+      title: "Notes",
       url: "#",
-      icon: FolderIcon,
-    },
-    {
-      title: "Team",
-      url: "#",
-      icon: UsersIcon,
-    },
+      icon: NotepadText,
+    }
   ],
   navClouds: [
     {
@@ -133,24 +125,21 @@ const data = {
   ],
   documents: [
     {
-      name: "Data Library",
+      name: "Vaults",
       url: "#",
       icon: DatabaseIcon,
     },
     {
-      name: "Reports",
+      name: "Teams",
       url: "#",
-      icon: ClipboardListIcon,
-    },
-    {
-      name: "Word Assistant",
-      url: "#",
-      icon: FileIcon,
+      icon: UsersIcon,
     },
   ],
 }
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
+  const { resolvedTheme } = useTheme();
+
   return (
     <Sidebar collapsible="offcanvas" {...props}>
       <SidebarHeader>
@@ -160,9 +149,9 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
               asChild
               className="data-[slot=sidebar-menu-button]:!p-1.5"
             >
-              <a href="#">
-                <ArrowUpCircleIcon className="h-5 w-5" />
-                <span className="text-base font-semibold">Acme Inc.</span>
+              <a href="#" className="h-full">
+                <Image src={resolvedTheme === "dark" ? "/logo-light.png" : "/logo-dark.png"} width={256} height={360} className="w-10" alt="Logotipo from Myth" />
+                <span className="text-base font-semibold">Myth</span>
               </a>
             </SidebarMenuButton>
           </SidebarMenuItem>
@@ -170,12 +159,9 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
       </SidebarHeader>
       <SidebarContent>
         <NavMain items={data.navMain} />
-        <NavDocuments items={data.documents} />
         <NavSecondary items={data.navSecondary} className="mt-auto" />
       </SidebarContent>
-      <SidebarFooter>
-        <NavUser user={data.user} />
-      </SidebarFooter>
+      <SidebarFooter></SidebarFooter>
     </Sidebar>
   )
 }
