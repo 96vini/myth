@@ -114,7 +114,7 @@ export default function PlansPage() {
   }
 
   return (
-    <div className="w-full h-[calc(100vh-8rem)] relative">
+    <div className="w-full h-[calc(100vh-4rem)] relative">
       <ReactFlow
         nodes={nodes}
         edges={edges}

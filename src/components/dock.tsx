@@ -87,7 +87,8 @@ export function Dock() {
         onMouseLeave={() => setHoveredIndex(null)}
       >
         {/* Dock Items */}
-        <div className="relative flex items-center gap-1.5 px-2 py-2">
+        <div className="relative flex items-center gap-1.5 px-2 py-2 bg-background/30 backdrop-blur-2xl shadow-[0_8px_32px_0_rgba(0,0,0,0.12)]">
+          <div className="absolute inset-0 rounded-2xl bg-gradient-to-b from-white/5 to-transparent pointer-events-none" />
           {dockItems.map((item, index) => {
             if (item.separator) {
               return (
@@ -104,7 +105,7 @@ export function Dock() {
             return (
               <div
                 key={item.id}
-                className="relative flex flex-col items-center"
+                className="relative z-10 flex flex-col items-center"
                 onMouseEnter={() => setHoveredIndex(index)}
               >
                 {/* Icon Container */}
