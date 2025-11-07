@@ -1,17 +1,16 @@
-import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar"
-import { AppSidebar } from "@/components/app-sidebar"
 import { ThemeProvider } from "@/components/theme-provider"
+import { AppHeader } from "@/components/app-header"
+import { AppFooter } from "@/components/app-footer"
 
 import type { Metadata } from 'next'
 import { Inter } from 'next/font/google'
 import './globals.css'
-import NavHeader from "@/components/nav-header"
 
 const inter = Inter({ subsets: ['latin'] })
 
 export const metadata: Metadata = {
-  title: 'Myth',
-  description: 'Organize your credentials',
+  title: 'Thunder',
+  description: 'Gerencie seu negócio com eficiência',
 }
 
 export default function RootLayout({
@@ -20,34 +19,29 @@ export default function RootLayout({
   children: React.ReactNode
 }) {
   return (
-    <html lang="en">
+    <html lang="pt-BR" suppressHydrationWarning>
       <body className={inter.className} suppressHydrationWarning>
-      <ThemeProvider
-        attribute="class"
-        defaultTheme="system"
-        enableSystem
-        disableTransitionOnChange
-      >
-        <SidebarProvider>
-          <div className="w-full flex flex-col md:flex-row justify-between">
-            
-            <div className="hidden md:block">
-              <AppSidebar />
-            </div>
+        <ThemeProvider
+          attribute="class"
+          defaultTheme="system"
+          enableSystem
+          disableTransitionOnChange
+        >
+          <div className="relative flex min-h-screen flex-col">
+            {/* Header */}
+            <AppHeader />
 
-            <main className="antialiased flex-1 h-screen bg-muted overflow-y-auto">
-              <div className="flex justify-between py-4 px-3">
-                <div className="block md:hidden">
-                  <SidebarTrigger />
-                </div>
-                <NavHeader />
+            {/* Main Content */}
+            <main className="flex-1 bg-gradient-to-b from-background via-background to-muted/20">
+              <div className="animate-in fade-in-50 duration-500">
+                {children}
               </div>
-              {children}
             </main>
-          
+
+            {/* Footer */}
+            <AppFooter />
           </div>
-          </SidebarProvider>
-      </ThemeProvider>
+        </ThemeProvider>
       </body>
     </html>
   )

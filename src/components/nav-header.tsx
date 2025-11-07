@@ -8,7 +8,7 @@ export default function NavHeader() {
   }
 
   return (
-    <div className="w-full flex justify-end bg-muted">
+    <div className="w-full flex justify-end">
       <div className="w-full md:w-[10vw]">
         <NavUser user={user} />
       </div>

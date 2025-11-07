@@ -1,67 +1,76 @@
 "use client"
 
-import { MailIcon, PlusCircleIcon, type LucideIcon } from "lucide-react"
+import { type LucideIcon } from "lucide-react"
+import { usePathname } from "next/navigation"
+import Link from "next/link"
 
-import { Button } from "@/components/ui/button"
 import {
   SidebarGroup,
+  SidebarGroupLabel,
   SidebarGroupContent,
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
 } from "@/components/ui/sidebar"
-import { useState } from "react"
-import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "./ui/dialog"
+import { cn } from "@/lib/utils"
 
 export function NavMain({
   items,
+  label,
 }: {
   items: {
     title: string
     url: string
     icon?: LucideIcon
+    badge?: string | number
   }[]
+  label?: string
 }) {
-  const [open, setOpen] = useState(false)
+  const pathname = usePathname()
+
   return (
-    <div>
-      <SidebarGroup>
-      <SidebarGroupContent className="flex flex-col gap-2">
+    <SidebarGroup>
+      {label && <SidebarGroupLabel className="text-xs font-semibold text-sidebar-foreground/70">{label}</SidebarGroupLabel>}
+      <SidebarGroupContent>
         <SidebarMenu>
-          <SidebarMenuItem className="flex items-center gap-2">
-            <SidebarMenuButton
-              tooltip="Quick Create"
-              className="min-w-8 bg-primary text-primary-foreground duration-200 ease-linear hover:bg-primary/90 hover:text-primary-foreground active:bg-primary/90 active:text-primary-foreground"
-              onClick={() => setOpen(true)}
-            >
-              <PlusCircleIcon />
-              <span>Quick Create</span>
-            </SidebarMenuButton>
-          </SidebarMenuItem>
-        </SidebarMenu>
-        <SidebarMenu>
-          {items.map((item) => (
-            <SidebarMenuItem key={item.title}>
-              <SidebarMenuButton tooltip={item.title}>
-                {item.icon && <item.icon />}
-                <span>{item.title}</span>
-              </SidebarMenuButton>
-            </SidebarMenuItem>
-          ))}
+          {items.map((item) => {
+            const isActive = pathname === item.url || pathname.startsWith(item.url + '/')
+            
+            return (
+              <SidebarMenuItem key={item.title}>
+                <SidebarMenuButton 
+                  asChild 
+                  tooltip={item.title}
+                  className={cn(
+                    "transition-all duration-200",
+                    isActive && "bg-sidebar-accent text-sidebar-accent-foreground font-medium"
+                  )}
+                >
+                  <Link href={item.url} className="flex items-center gap-3">
+                    {item.icon && (
+                      <item.icon className={cn(
+                        "transition-all",
+                        isActive ? "text-sidebar-accent-foreground" : "text-sidebar-foreground/60"
+                      )} />
+                    )}
+                    <span className="flex-1">{item.title}</span>
+                    {item.badge && (
+                      <span className={cn(
+                        "ml-auto flex h-5 min-w-5 items-center justify-center rounded-full px-1.5 text-xs font-medium transition-colors",
+                        isActive 
+                          ? "bg-sidebar-accent-foreground/10 text-sidebar-accent-foreground" 
+                          : "bg-sidebar-accent text-sidebar-accent-foreground"
+                      )}>
+                        {item.badge}
+                      </span>
+                    )}
+                  </Link>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+            )
+          })}
         </SidebarMenu>
       </SidebarGroupContent>
     </SidebarGroup>
-      <Dialog open={open} onOpenChange={setOpen}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Criar nova credencial</DialogTitle>
-          </DialogHeader>
-          <p>Conteúdo do modal...</p>
-          <DialogFooter className="w-full flex justify-between">
-            <Button onClick={() => alert('salvo')}>Salvar</Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
-    </div>
   )
 }
