@@ -1,8 +1,15 @@
 "use client"
 
 import { Dock } from "@/components/dock"
-import NavHeader from "@/components/nav-header"
+import { NavUser } from "@/components/nav-user"
 import Image from "next/image"
+
+const user = {
+  name: "vini",
+  email: "96@thunder.com",
+  avatar: "/avatars/shadcn.jpg",
+}
+
 
 export function AppHeader() {
   return (
@@ -20,7 +27,7 @@ export function AppHeader() {
               priority
             />
           </div>
-          <span className="text-lg font-bold bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent hidden sm:inline-block">
+          <span className="text-sm text-primary font-bold hidden sm:inline-block">
             Thunder
           </span>
         </div>
@@ -32,7 +39,7 @@ export function AppHeader() {
 
         {/* Right Section - Nav Header */}
         <div className="flex items-center">
-          <NavHeader />
+          <NavUser user={user} />
         </div>
       </div>
 

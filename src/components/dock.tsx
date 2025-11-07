@@ -37,28 +37,10 @@ const dockItems: (DockItem | { id: string; separator: true; icon?: never; label:
     href: "/",
   },
   {
-    id: "customers",
-    icon: ImagesIcon,
-    label: "Posts",
-    href: "/customers",
-  },
-  {
-    id: "team",
-    icon: Calendar1Icon,
-    label: "Agenda",
-    href: "/team",
-  },
-  {
-    id: "plans",
+    id: "workflow",
     icon: SquareDashedMousePointerIcon,
     label: "Fluxo",
-    href: "/plans",
-  },
-  {
-    id: "finance",
-    icon: SwordIcon,
-    label: "Benchmark",
-    href: "/finance",
+    href: "/workflow",
   },
   {
     id: "separator",
@@ -66,22 +48,10 @@ const dockItems: (DockItem | { id: string; separator: true; icon?: never; label:
     label: "",
   },
   {
-    id: "folders",
-    icon: FolderIcon,
-    label: "Arquivos",
-    href: "/files",
-  },
-  {
     id: "notifications",
     icon: BellIcon,
     label: "Notificações",
     href: "/notifications",
-  },
-  {
-    id: "messages",
-    icon: MessageSquareIcon,
-    label: "Mensagens",
-    href: "/messages",
   },
   {
     id: "settings",
