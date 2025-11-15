@@ -12,24 +12,20 @@ import {
   addEdge,
   useNodesState,
   useEdgesState,
-  Panel,
   MarkerType,
+  ReactFlowProvider,
+  useReactFlow,
 } from "@xyflow/react"
 import "@xyflow/react/dist/style.css"
 import {
   Plus,
   Trash2,
+  Copy,
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
-import { Badge } from "@/components/ui/badge"
-import { Card } from "@/components/ui/card"
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select"
+import { Toolbar } from "@/components/workflow/toolbar"
+import { nodeTypes } from "@/components/workflow/node-type-submenu"
+import { edgeTypes } from "@/components/workflow/edge-type-submenu"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import {
@@ -40,14 +36,13 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog"
-// Edge type options
-const edgeTypes = {
-  straight: "Reta",
-  smoothstep: "Suave",
-  step: "Degrau",
-  bezier: "Curva",
-}
-
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuLabel,
+} from "@/components/ui/dropdown-menu"
 // Marker type options
 const markerTypes = {
   [MarkerType.ArrowClosed]: "Fechada",
@@ -57,6 +52,134 @@ const markerTypes = {
 const initialNodes: Node[] = []
 const initialEdges: Edge[] = []
 
+function FlowContent({
+  nodes,
+  setNodes,
+  edges,
+  setEdges,
+  onNodesChange,
+  onEdgesChange,
+  onConnect,
+  edgeType,
+  setEdgeType,
+  markerType,
+  setMarkerType,
+  isAddNodeDialogOpen,
+  setIsAddNodeDialogOpen,
+  newNodeLabel,
+  setNewNodeLabel,
+  nodeCounter,
+  setNodeCounter,
+  handleDeleteSelected,
+  contextMenu,
+  setContextMenu,
+  handleNodeContextMenu,
+  handlePaneContextMenu,
+  handleContextMenuAction,
+  selectedTool,
+  setSelectedTool,
+}: any) {
+  const { zoomIn, zoomOut, fitView, getViewport } = useReactFlow()
+
+  const handleZoomIn = useCallback(() => {
+    zoomIn()
+  }, [zoomIn])
+
+  const handleZoomOut = useCallback(() => {
+    zoomOut()
+  }, [zoomOut])
+
+  const handleFitView = useCallback(() => {
+    fitView()
+  }, [fitView])
+
+  const handleAddNodeByType = useCallback(
+    (nodeType: keyof typeof nodeTypes) => {
+      const viewport = getViewport()
+      const centerX = -viewport.x / viewport.zoom + window.innerWidth / 2 / viewport.zoom
+      const centerY = -viewport.y / viewport.zoom + window.innerHeight / 2 / viewport.zoom
+
+      const newNode: Node = {
+        id: `node-${nodeCounter}`,
+        type: nodeType,
+        position: {
+          x: centerX - 75,
+          y: centerY - 40,
+        },
+        data: { 
+          label: nodeTypes[nodeType].label,
+          nodeType: nodeType,
+        },
+      }
+
+      setNodes((nds: Node[]) => [...nds, newNode])
+      setNodeCounter((prev: number) => prev + 1)
+      setSelectedTool("select")
+    },
+    [nodeCounter, setNodes, getViewport, setNodeCounter, setSelectedTool]
+  )
+
+  const nodeColor = (node: Node) => {
+    return node.selected ? "hsl(var(--primary))" : "hsl(var(--muted-foreground))"
+  }
+
+  return (
+    <>
+      <Toolbar
+        selectedTool={selectedTool}
+        onToolSelect={setSelectedTool}
+        onAddNode={handleAddNodeByType}
+        onEdgeTypeChange={(edgeType) => setEdgeType(edgeType as keyof typeof edgeTypes)}
+        currentEdgeType={edgeType}
+        onZoomIn={handleZoomIn}
+        onZoomOut={handleZoomOut}
+        onFitView={handleFitView}
+        onDeleteSelected={handleDeleteSelected}
+        hasSelectedNodes={nodes.some((n: Node) => n.selected)}
+      />
+
+      <ReactFlow
+        nodes={nodes}
+        edges={edges}
+        onNodesChange={onNodesChange}
+        onEdgesChange={onEdgesChange}
+        onConnect={onConnect}
+        onNodeContextMenu={handleNodeContextMenu}
+        onPaneContextMenu={handlePaneContextMenu}
+        fitView
+        className="bg-gradient-to-br from-background via-background to-muted/20"
+        connectionLineStyle={{ stroke: "hsl(var(--primary))", strokeWidth: 2 }}
+        defaultEdgeOptions={{
+          type: edgeType,
+          animated: true,
+          style: { stroke: "hsl(var(--primary))", strokeWidth: 2 },
+          markerEnd: { type: markerType, color: "hsl(var(--primary))" },
+        }}
+        deleteKeyCode="Delete"
+        multiSelectionKeyCode="Shift"
+        nodesConnectable={true}
+        elementsSelectable={true}
+      >
+        <Background
+          color="hsl(var(--muted-foreground) / 0.1)"
+          gap={20}
+          size={1}
+        />
+        <Controls
+          className="bg-background/80 backdrop-blur-sm border-border/50 rounded-xl shadow-lg"
+          showInteractive={false}
+        />
+        <MiniMap
+          nodeColor={nodeColor}
+          nodeStrokeWidth={3}
+          className="bg-background/80 backdrop-blur-sm border-border/50 rounded-xl shadow-lg"
+          maskColor="hsl(var(--background) / 0.3)"
+        />
+      </ReactFlow>
+    </>
+  )
+}
+
 export default function PlansPage() {
   const [nodes, setNodes, onNodesChange] = useNodesState(initialNodes)
   const [edges, setEdges, onEdgesChange] = useEdgesState(initialEdges)
@@ -65,6 +188,12 @@ export default function PlansPage() {
   const [isAddNodeDialogOpen, setIsAddNodeDialogOpen] = useState(false)
   const [newNodeLabel, setNewNodeLabel] = useState("")
   const [nodeCounter, setNodeCounter] = useState(1)
+  const [contextMenu, setContextMenu] = useState<{
+    x: number
+    y: number
+    nodeId?: string
+  } | null>(null)
+  const [selectedTool, setSelectedTool] = useState<string>("select")
 
   const onConnect = useCallback(
     (params: Connection) => {
@@ -99,6 +228,7 @@ export default function PlansPage() {
     setIsAddNodeDialogOpen(false)
   }, [newNodeLabel, nodeCounter, setNodes])
 
+
   const handleDeleteSelected = useCallback(() => {
     setNodes((nds) => nds.filter((node) => !node.selected))
     setEdges((eds) =>
@@ -109,142 +239,107 @@ export default function PlansPage() {
     )
   }, [nodes, setNodes, setEdges])
 
-  const nodeColor = (node: Node) => {
-    return node.selected ? "hsl(var(--primary))" : "hsl(var(--muted-foreground))"
-  }
+  const handleNodeContextMenu = useCallback(
+    (event: React.MouseEvent, node: Node) => {
+      event.preventDefault()
+      setContextMenu({
+        x: event.clientX,
+        y: event.clientY,
+        nodeId: node.id,
+      })
+    },
+    []
+  )
+
+  const handlePaneContextMenu = useCallback((event: MouseEvent | React.MouseEvent) => {
+    event.preventDefault()
+    const clientX = 'clientX' in event ? event.clientX : (event as MouseEvent).clientX
+    const clientY = 'clientY' in event ? event.clientY : (event as MouseEvent).clientY
+    setContextMenu({
+      x: clientX,
+      y: clientY,
+    })
+  }, [])
+
+  const handleContextMenuAction = useCallback(
+    (action: string) => {
+      if (contextMenu?.nodeId) {
+        const node = nodes.find((n) => n.id === contextMenu.nodeId)
+        if (node) {
+          switch (action) {
+            case "copy":
+              // Implementar cópia
+              break
+            case "delete":
+              setNodes((nds) => nds.filter((n) => n.id !== contextMenu.nodeId))
+              setEdges((eds) =>
+                eds.filter(
+                  (edge) =>
+                    edge.source !== contextMenu.nodeId &&
+                    edge.target !== contextMenu.nodeId
+                )
+              )
+              break
+            case "duplicate":
+              const newNode: Node = {
+                ...node,
+                id: `node-${nodeCounter}`,
+                position: {
+                  x: node.position.x + 50,
+                  y: node.position.y + 50,
+                },
+                selected: false,
+              }
+              setNodes((nds) => [...nds, newNode])
+              setNodeCounter((prev) => prev + 1)
+              break
+          }
+        }
+      } else {
+        switch (action) {
+          case "addNode":
+            setIsAddNodeDialogOpen(true)
+            break
+          case "paste":
+            // Implementar colar
+            break
+        }
+      }
+      setContextMenu(null)
+    },
+    [contextMenu, nodes, setNodes, setEdges, nodeCounter]
+  )
 
   return (
-    <div className="w-full h-[calc(100vh-4rem)] relative">
-      <ReactFlow
-        nodes={nodes}
-        edges={edges}
-        onNodesChange={onNodesChange}
-        onEdgesChange={onEdgesChange}
-        onConnect={onConnect}
-        fitView
-        className="bg-gradient-to-br from-background via-background to-muted/20"
-        connectionLineStyle={{ stroke: "hsl(var(--primary))", strokeWidth: 2 }}
-        defaultEdgeOptions={{
-          type: edgeType,
-          animated: true,
-          style: { stroke: "hsl(var(--primary))", strokeWidth: 2 },
-          markerEnd: { type: markerType, color: "hsl(var(--primary))" },
-        }}
-        deleteKeyCode="Delete"
-        multiSelectionKeyCode="Shift"
-        nodesConnectable={true}
-        elementsSelectable={true}
-      >
-        <Background
-          color="hsl(var(--muted-foreground) / 0.1)"
-          gap={20}
-          size={1}
+    <ReactFlowProvider>
+      <div className="w-full h-[calc(100vh-4rem)] relative">
+        <FlowContent
+          nodes={nodes}
+          setNodes={setNodes}
+          edges={edges}
+          setEdges={setEdges}
+          onNodesChange={onNodesChange}
+          onEdgesChange={onEdgesChange}
+          onConnect={onConnect}
+          edgeType={edgeType}
+          setEdgeType={setEdgeType}
+          markerType={markerType}
+          setMarkerType={setMarkerType}
+          isAddNodeDialogOpen={isAddNodeDialogOpen}
+          setIsAddNodeDialogOpen={setIsAddNodeDialogOpen}
+          newNodeLabel={newNodeLabel}
+          setNewNodeLabel={setNewNodeLabel}
+          nodeCounter={nodeCounter}
+          setNodeCounter={setNodeCounter}
+          handleDeleteSelected={handleDeleteSelected}
+          contextMenu={contextMenu}
+          setContextMenu={setContextMenu}
+          handleNodeContextMenu={handleNodeContextMenu}
+          handlePaneContextMenu={handlePaneContextMenu}
+          handleContextMenuAction={handleContextMenuAction}
+          selectedTool={selectedTool}
+          setSelectedTool={setSelectedTool}
         />
-        <Controls
-          className="bg-background/80 backdrop-blur-sm border-border/50 rounded-xl shadow-lg"
-          showInteractive={false}
-        />
-        <MiniMap
-          nodeColor={nodeColor}
-          nodeStrokeWidth={3}
-          className="bg-background/80 backdrop-blur-sm border-border/50 rounded-xl shadow-lg"
-          maskColor="hsl(var(--background) / 0.3)"
-        />
-
-        {/* Top Panel */}
-        <Panel position="top-center" className="mt-4">
-          <Card className="px-6 py-4 bg-background/95 backdrop-blur-xl border-border/50 shadow-xl">
-            <div className="flex items-center gap-6">
-              <div>
-                <h1 className="text-2xl font-bold tracking-tight bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">
-                  Editor de Fluxo
-                </h1>
-                <p className="text-sm text-muted-foreground mt-1">
-                  Adicione nós e conecte-os com diferentes tipos de setas
-                </p>
-              </div>
-              <div className="flex items-center gap-2 ml-auto">
-                <Button
-                  onClick={() => setIsAddNodeDialogOpen(true)}
-                  className="rounded-xl"
-                  size="sm"
-                >
-                  <Plus className="h-4 w-4 mr-2" />
-                  Adicionar Nó
-                </Button>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={handleDeleteSelected}
-                  className="rounded-xl"
-                  disabled={!nodes.some((n) => n.selected)}
-                >
-                  <Trash2 className="h-4 w-4 mr-2" />
-                  Deletar Selecionado
-                </Button>
-              </div>
-            </div>
-          </Card>
-        </Panel>
-
-        {/* Edge Type Selector Panel */}
-        <Panel position="top-left" className="mt-24 ml-4">
-          <Card className="p-4 bg-background/95 backdrop-blur-xl border-border/50 shadow-xl min-w-[250px]">
-            <div className="space-y-4">
-              <div>
-                <Label className="text-sm font-semibold mb-2 block">Tipo de Linha</Label>
-                <Select
-                  value={edgeType}
-                  onValueChange={(value) => setEdgeType(value as keyof typeof edgeTypes)}
-                >
-                  <SelectTrigger className="rounded-xl">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {Object.entries(edgeTypes).map(([key, label]) => (
-                      <SelectItem key={key} value={key}>
-                        {label}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-              <div>
-                <Label className="text-sm font-semibold mb-2 block">Tipo de Seta</Label>
-                <Select
-                  value={markerType.toString()}
-                  onValueChange={(value) => setMarkerType(Number(value) as unknown as MarkerType)}
-                >
-                  <SelectTrigger className="rounded-xl">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {Object.entries(markerTypes).map(([key, label]) => (
-                      <SelectItem key={key} value={key}>
-                        {label}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-              <div className="pt-2 border-t border-border/50">
-                <div className="flex items-center justify-between text-xs">
-                  <span className="text-muted-foreground">Nós</span>
-                  <Badge variant="secondary" className="rounded-full">
-                    {nodes.length}
-                  </Badge>
-                </div>
-                <div className="flex items-center justify-between text-xs mt-2">
-                  <span className="text-muted-foreground">Conexões</span>
-                  <Badge variant="secondary" className="rounded-full">
-                    {edges.length}
-                  </Badge>
-                </div>
-              </div>
-            </div>
-          </Card>
-        </Panel>
-      </ReactFlow>
 
       {/* Add Node Dialog */}
       <Dialog open={isAddNodeDialogOpen} onOpenChange={setIsAddNodeDialogOpen}>
@@ -290,12 +385,68 @@ export default function PlansPage() {
               onClick={handleAddNode}
               disabled={!newNodeLabel.trim()}
               className="h-11 rounded-xl shadow-lg hover:shadow-xl transition-all"
+              style={{ backgroundColor: "#23b559", color: "white" }}
             >
               Adicionar
             </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
-    </div>
+
+      {/* Context Menu */}
+      {contextMenu && (
+        <>
+          <div
+            className="fixed inset-0 z-30"
+            onClick={() => setContextMenu(null)}
+          />
+          <DropdownMenu open={!!contextMenu} onOpenChange={() => setContextMenu(null)}>
+            <DropdownMenuContent
+              style={{
+                position: "fixed",
+                left: contextMenu.x,
+                top: contextMenu.y,
+              }}
+              className="w-48"
+            >
+              {contextMenu.nodeId ? (
+                <>
+                  <DropdownMenuLabel>Ações do Nó</DropdownMenuLabel>
+                  <DropdownMenuItem onClick={() => handleContextMenuAction("duplicate")}>
+                    <Copy className="h-4 w-4 mr-2" />
+                    Duplicar
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => handleContextMenuAction("copy")}>
+                    <Copy className="h-4 w-4 mr-2" />
+                    Copiar
+                  </DropdownMenuItem>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem
+                    onClick={() => handleContextMenuAction("delete")}
+                    className="text-destructive focus:text-destructive"
+                  >
+                    <Trash2 className="h-4 w-4 mr-2" />
+                    Deletar
+                  </DropdownMenuItem>
+                </>
+              ) : (
+                <>
+                  <DropdownMenuLabel>Ações do Canvas</DropdownMenuLabel>
+                  <DropdownMenuItem onClick={() => handleContextMenuAction("addNode")}>
+                    <Plus className="h-4 w-4 mr-2" />
+                    Adicionar Nó
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => handleContextMenuAction("paste")}>
+                    <Copy className="h-4 w-4 mr-2" />
+                    Colar
+                  </DropdownMenuItem>
+                </>
+              )}
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </>
+      )}
+      </div>
+    </ReactFlowProvider>
   )
 }
