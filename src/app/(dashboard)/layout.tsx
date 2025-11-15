@@ -1,0 +1,26 @@
+import { AppHeader } from "@/components/app-header"
+import { AppFooter } from "@/components/app-footer"
+
+export default function DashboardLayout({
+  children,
+}: {
+  children: React.ReactNode
+}) {
+  return (
+    <div className="relative flex min-h-screen flex-col">
+      {/* Header */}
+      <AppHeader />
+
+      {/* Main Content */}
+      <main className="flex-1 bg-gradient-to-b from-background via-background to-muted/20">
+        <div className="animate-in fade-in-50 duration-500">
+          {children}
+        </div>
+      </main>
+
+      {/* Footer */}
+      <AppFooter />
+    </div>
+  )
+}
+

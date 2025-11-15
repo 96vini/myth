@@ -17,6 +17,7 @@ import {
   type LucideIcon,
   Calendar1Icon,
   SwordIcon,
+  BotIcon,
 } from "lucide-react"
 import { cn } from "@/lib/utils"
 
@@ -41,6 +42,12 @@ const dockItems: (DockItem | { id: string; separator: true; icon?: never; label:
     icon: SquareDashedMousePointerIcon,
     label: "Fluxo",
     href: "/workflow",
+  },
+  {
+    id: "bots",
+    icon: BotIcon,
+    label: "Bots",
+    href: "/bots",
   },
   {
     id: "separator",
@@ -80,7 +87,7 @@ export function Dock() {
   }, [router])
 
   return (
-    <div className="relative inline-flex">
+    <div className="relative inline-flex mt-5">
       {/* Dock Container */}
       <div
         className="relative rounded-2xl bg-background/60 backdrop-blur-xl border border-border/10 shadow-xl"

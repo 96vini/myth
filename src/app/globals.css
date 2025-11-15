@@ -116,4 +116,56 @@
     -ms-overflow-style: none;  /* IE and Edge */
     scrollbar-width: none;  /* Firefox */
   }
+
+  /* Animated border drawing effect */
+  @keyframes border-draw {
+    0% {
+      transform: rotate(0deg);
+    }
+    100% {
+      transform: rotate(360deg);
+    }
+  }
+
+  .border-light-effect {
+    position: relative;
+  }
+
+  .border-light-effect::before {
+    content: '';
+    position: absolute;
+    top: -2px;
+    left: -2px;
+    right: -2px;
+    bottom: -2px;
+    border-radius: inherit;
+    background: conic-gradient(
+      from 0deg,
+      transparent 0deg,
+      transparent 320deg,
+      hsl(var(--primary)) 330deg,
+      hsl(var(--primary)) 30deg,
+      transparent 40deg,
+      transparent 360deg
+    );
+    animation: border-draw 3s linear infinite;
+    z-index: 0;
+  }
+
+  .border-light-effect::after {
+    content: '';
+    position: absolute;
+    top: 2px;
+    left: 2px;
+    right: 2px;
+    bottom: 2px;
+    background: hsl(var(--background));
+    border-radius: 0.375rem;
+    z-index: 0;
+  }
+
+  .border-light-effect > * {
+    position: relative;
+    z-index: 1;
+  }
 }

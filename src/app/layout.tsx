@@ -1,12 +1,7 @@
 import { ThemeProvider } from "@/components/theme-provider"
-import { AppHeader } from "@/components/app-header"
-import { AppFooter } from "@/components/app-footer"
 
 import type { Metadata } from 'next'
-import { Inter } from 'next/font/google'
 import './globals.css'
-
-const inter = Inter({ subsets: ['latin'] })
 
 export const metadata: Metadata = {
   title: 'Thunder',
@@ -20,24 +15,14 @@ export default function RootLayout({
 }) {
   return (
     <html lang="pt-BR" suppressHydrationWarning>
-      <body className={inter.className} suppressHydrationWarning>
+      <body className="font-sans" suppressHydrationWarning>
         <ThemeProvider
           attribute="class"
           defaultTheme="system"
           enableSystem
           disableTransitionOnChange
         >
-          <div className="relative flex min-h-screen flex-col">
-            {/* Header */}
-            <AppHeader />
-
-            {/* Main Content */}
-            <main className="flex-1 bg-gradient-to-b from-background via-background to-muted/20">
-              <div className="animate-in fade-in-50 duration-500">
-                {children}
-              </div>
-            </main>
-          </div>
+          {children}
         </ThemeProvider>
       </body>
     </html>
