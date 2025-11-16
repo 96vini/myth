@@ -99,8 +99,8 @@ export function IfDecisionNode({ id, data, selected }: NodeProps<DecisionNodeDat
         type="source"
         position={Position.Right}
         id="false"
-        className="w-3 h-3 bg-red-500"
-        style={{ right: "50%", transform: "translateX(50%)" }}
+        className="w-3 h-3"
+        style={{ right: "50%", transform: "translateX(50%)", backgroundColor: "#ED333E" }}
       />
     </div>
   )

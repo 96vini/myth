@@ -24,6 +24,8 @@ export function EdgeLabel({
   })
 
   const label = data?.label || data?.condition || ""
+  const isNegation = data?.isNegation || label === "Não"
+  const labelColor = isNegation ? "#ED333E" : "#23b559"
 
   return (
     <>
@@ -39,7 +41,10 @@ export function EdgeLabel({
             }}
             className="nodrag nopan"
           >
-            <div className="px-2 py-0.5 rounded bg-[#23b559] text-white text-xs font-medium shadow-sm">
+            <div 
+              className="px-2 py-0.5 rounded text-white text-xs font-medium shadow-sm"
+              style={{ backgroundColor: labelColor }}
+            >
               {label}
             </div>
           </div>
