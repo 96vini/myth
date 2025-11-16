@@ -21,11 +21,21 @@ import {
   Plus,
   Trash2,
   Copy,
+  Settings,
+  Play,
+  Pause,
+  Edit,
+  Share2,
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Toolbar } from "@/components/workflow/toolbar"
 import { nodeTypes } from "@/components/workflow/node-type-submenu"
 import { edgeTypes } from "@/components/workflow/edge-type-submenu"
+import { CustomNode } from "@/components/workflow/custom-node"
+import { NodeConfigPanel } from "@/components/workflow/node-config-panel"
+import { EdgeLabel } from "@/components/workflow/components/edge-label"
+import { DecisionNode } from "@/components/workflow/nodes/decision-node"
+import { OriginNode } from "@/components/workflow/nodes/source/origin-node"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import {
@@ -64,10 +74,6 @@ function FlowContent({
   setEdgeType,
   markerType,
   setMarkerType,
-  isAddNodeDialogOpen,
-  setIsAddNodeDialogOpen,
-  newNodeLabel,
-  setNewNodeLabel,
   nodeCounter,
   setNodeCounter,
   handleDeleteSelected,
@@ -76,6 +82,7 @@ function FlowContent({
   handleNodeContextMenu,
   handlePaneContextMenu,
   handleContextMenuAction,
+  handleAddNode: handleAddNodeProp,
   selectedTool,
   setSelectedTool,
 }: any) {
@@ -109,6 +116,8 @@ function FlowContent({
         data: { 
           label: nodeTypes[nodeType].label,
           nodeType: nodeType,
+          description: nodeTypes[nodeType].description,
+          isEditing: true, // Entra em modo de edição automaticamente
         },
       }
 
@@ -119,9 +128,52 @@ function FlowContent({
     [nodeCounter, setNodes, getViewport, setNodeCounter, setSelectedTool]
   )
 
+  const handleAddNode = useCallback(() => {
+    const viewport = getViewport()
+    const centerX = -viewport.x / viewport.zoom + window.innerWidth / 2 / viewport.zoom
+    const centerY = -viewport.y / viewport.zoom + window.innerHeight / 2 / viewport.zoom
+
+    const newNode: Node = {
+      id: `node-${nodeCounter}`,
+      type: "default",
+      position: {
+        x: centerX - 75,
+        y: centerY - 40,
+      },
+      data: { 
+        label: "",
+        isEditing: true, // Entra em modo de edição automaticamente
+      },
+    }
+
+    setNodes((nds: Node[]) => [...nds, newNode])
+    setNodeCounter((prev: number) => prev + 1)
+  }, [nodeCounter, setNodes, getViewport, setNodeCounter])
+
   const nodeColor = (node: Node) => {
     return node.selected ? "hsl(var(--primary))" : "hsl(var(--muted-foreground))"
   }
+
+  // Encontrar nó selecionado
+  const selectedNode = nodes.find((n: Node) => n.selected) || null
+
+  // Handler para atualizar dados do nó
+  const handleUpdateNode = useCallback(
+    (nodeId: string, data: any) => {
+      setNodes((nds: Node[]) =>
+        nds.map((node) => (node.id === nodeId ? { ...node, data: { ...node.data, ...data } } : node))
+      )
+    },
+    [setNodes]
+  )
+
+  // Wrapper para handleContextMenuAction que inclui handleAddNode
+  const handleContextMenuActionWithAdd = useCallback(
+    (action: string) => {
+      handleContextMenuAction(action, handleAddNode)
+    },
+    [handleContextMenuAction, handleAddNode]
+  )
 
   return (
     <>
@@ -129,8 +181,6 @@ function FlowContent({
         selectedTool={selectedTool}
         onToolSelect={setSelectedTool}
         onAddNode={handleAddNodeByType}
-        onEdgeTypeChange={(edgeType) => setEdgeType(edgeType as keyof typeof edgeTypes)}
-        currentEdgeType={edgeType}
         onZoomIn={handleZoomIn}
         onZoomOut={handleZoomOut}
         onFitView={handleFitView}
@@ -147,6 +197,20 @@ function FlowContent({
         onNodeContextMenu={handleNodeContextMenu}
         onPaneContextMenu={handlePaneContextMenu}
         fitView
+        nodeTypes={{
+          default: CustomNode,
+          team: CustomNode,
+          lead: CustomNode,
+          message: CustomNode,
+          bot: CustomNode,
+          filter: CustomNode,
+          action: CustomNode,
+          origin: OriginNode,
+          if: DecisionNode,
+        }}
+        edgeTypes={{
+          default: EdgeLabel,
+        }}
         className="bg-gradient-to-br from-background via-background to-muted/20"
         connectionLineStyle={{ stroke: "hsl(var(--primary))", strokeWidth: 2 }}
         defaultEdgeOptions={{
@@ -161,21 +225,108 @@ function FlowContent({
         elementsSelectable={true}
       >
         <Background
-          color="hsl(var(--muted-foreground) / 0.1)"
+          color="hsl(var(--black) / 0.1)"
           gap={20}
           size={1}
         />
         <Controls
-          className="bg-background/80 backdrop-blur-sm border-border/50 rounded-xl shadow-lg"
           showInteractive={false}
         />
         <MiniMap
           nodeColor={nodeColor}
           nodeStrokeWidth={3}
           className="bg-background/80 backdrop-blur-sm border-border/50 rounded-xl shadow-lg"
-          maskColor="hsl(var(--background) / 0.3)"
+          maskColor="hsl(var(--black) / 0.3)"
         />
       </ReactFlow>
+
+      {/* Node Configuration Panel */}
+      {selectedNode && (
+        <NodeConfigPanel
+          selectedNode={selectedNode}
+          onClose={() => {
+            setNodes((nds: Node[]) =>
+              nds.map((node) => ({ ...node, selected: false }))
+            )
+          }}
+          onUpdateNode={handleUpdateNode}
+        />
+      )}
+
+      {/* Context Menu */}
+      {contextMenu && (
+        <>
+          <div
+            className="fixed inset-0 z-30"
+            onClick={() => setContextMenu(null)}
+          />
+          <DropdownMenu open={!!contextMenu} onOpenChange={() => setContextMenu(null)}>
+            <DropdownMenuContent
+              style={{
+                position: "fixed",
+                left: contextMenu.x,
+                top: contextMenu.y,
+              }}
+              className="w-48"
+            >
+              {contextMenu.nodeId ? (
+                <>
+                  <DropdownMenuLabel>Ações do Elemento</DropdownMenuLabel>
+                  <DropdownMenuItem onClick={() => handleContextMenuActionWithAdd("edit")}>
+                    <Edit className="h-4 w-4 mr-2" />
+                    Editar Configuração
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => handleContextMenuActionWithAdd("duplicate")}>
+                    <Copy className="h-4 w-4 mr-2" />
+                    Duplicar Elemento
+                  </DropdownMenuItem>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem onClick={() => handleContextMenuActionWithAdd("test")}>
+                    <Play className="h-4 w-4 mr-2" />
+                    Testar Elemento
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => handleContextMenuActionWithAdd("pause")}>
+                    <Pause className="h-4 w-4 mr-2" />
+                    Pausar Elemento
+                  </DropdownMenuItem>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem
+                    onClick={() => handleContextMenuActionWithAdd("delete")}
+                    className="text-destructive focus:text-destructive"
+                  >
+                    <Trash2 className="h-4 w-4 mr-2" />
+                    Remover
+                  </DropdownMenuItem>
+                </>
+              ) : (
+                <>
+                  <DropdownMenuLabel>Ações do Fluxo</DropdownMenuLabel>
+                  <DropdownMenuItem onClick={() => {
+                    handleAddNode()
+                    setContextMenu(null)
+                  }}>
+                    <Plus className="h-4 w-4 mr-2" />
+                    Adicionar Elemento
+                  </DropdownMenuItem>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem onClick={() => handleContextMenuActionWithAdd("testFlow")}>
+                    <Play className="h-4 w-4 mr-2" />
+                    Testar Fluxo
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => handleContextMenuActionWithAdd("settings")}>
+                    <Settings className="h-4 w-4 mr-2" />
+                    Configurações do Fluxo
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => handleContextMenuActionWithAdd("share")}>
+                    <Share2 className="h-4 w-4 mr-2" />
+                    Compartilhar Fluxo
+                  </DropdownMenuItem>
+                </>
+              )}
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </>
+      )}
     </>
   )
 }
@@ -185,8 +336,6 @@ export default function PlansPage() {
   const [edges, setEdges, onEdgesChange] = useEdgesState(initialEdges)
   const [edgeType, setEdgeType] = useState<keyof typeof edgeTypes>("smoothstep")
   const [markerType, setMarkerType] = useState<MarkerType>(MarkerType.ArrowClosed)
-  const [isAddNodeDialogOpen, setIsAddNodeDialogOpen] = useState(false)
-  const [newNodeLabel, setNewNodeLabel] = useState("")
   const [nodeCounter, setNodeCounter] = useState(1)
   const [contextMenu, setContextMenu] = useState<{
     x: number
@@ -197,6 +346,20 @@ export default function PlansPage() {
 
   const onConnect = useCallback(
     (params: Connection) => {
+      const sourceNode = nodes.find((n) => n.id === params.source)
+      const isDecisionNode = sourceNode?.type === "if" || sourceNode?.type === "switch" || sourceNode?.type === "rule_engine"
+      
+      let label = ""
+      if (isDecisionNode && params.sourceHandle) {
+        if (params.sourceHandle === "true" || params.sourceHandle === "yes") {
+          label = "Sim"
+        } else if (params.sourceHandle === "false" || params.sourceHandle === "no") {
+          label = "Não"
+        } else {
+          label = params.sourceHandle
+        }
+      }
+
       const newEdge: Edge = {
         ...params,
         id: `e${params.source}-${params.target}-${Date.now()}`,
@@ -204,29 +367,16 @@ export default function PlansPage() {
         animated: true,
         style: { stroke: "hsl(var(--primary))", strokeWidth: 2 },
         markerEnd: { type: markerType, color: "hsl(var(--primary))" },
+        data: {
+          label: label,
+          condition: label,
+        },
       }
       setEdges((eds) => addEdge(newEdge, eds))
     },
-    [edgeType, markerType, setEdges]
+    [edgeType, markerType, setEdges, nodes]
   )
 
-  const handleAddNode = useCallback(() => {
-    if (!newNodeLabel.trim()) return
-
-    const newNode: Node = {
-      id: `node-${nodeCounter}`,
-      position: {
-        x: Math.random() * 400 + 100,
-        y: Math.random() * 400 + 100,
-      },
-      data: { label: newNodeLabel },
-    }
-
-    setNodes((nds) => [...nds, newNode])
-    setNodeCounter((prev) => prev + 1)
-    setNewNodeLabel("")
-    setIsAddNodeDialogOpen(false)
-  }, [newNodeLabel, nodeCounter, setNodes])
 
 
   const handleDeleteSelected = useCallback(() => {
@@ -262,13 +412,14 @@ export default function PlansPage() {
   }, [])
 
   const handleContextMenuAction = useCallback(
-    (action: string) => {
+    (action: string, handleAddNodeFn?: () => void) => {
       if (contextMenu?.nodeId) {
         const node = nodes.find((n) => n.id === contextMenu.nodeId)
         if (node) {
           switch (action) {
-            case "copy":
-              // Implementar cópia
+            case "edit":
+              // TODO: Abrir modal de edição do elemento
+              console.log("Editar elemento:", node)
               break
             case "delete":
               setNodes((nds) => nds.filter((n) => n.id !== contextMenu.nodeId))
@@ -293,15 +444,34 @@ export default function PlansPage() {
               setNodes((nds) => [...nds, newNode])
               setNodeCounter((prev) => prev + 1)
               break
+            case "test":
+              // TODO: Testar elemento individual
+              console.log("Testar elemento:", node)
+              break
+            case "pause":
+              // TODO: Pausar elemento
+              console.log("Pausar elemento:", node)
+              break
           }
         }
       } else {
         switch (action) {
           case "addNode":
-            setIsAddNodeDialogOpen(true)
+            if (handleAddNodeFn) {
+              handleAddNodeFn()
+            }
             break
-          case "paste":
-            // Implementar colar
+          case "testFlow":
+            // TODO: Testar fluxo completo
+            console.log("Testar fluxo")
+            break
+          case "settings":
+            // TODO: Abrir configurações do fluxo
+            console.log("Configurações do fluxo")
+            break
+          case "share":
+            // TODO: Compartilhar fluxo
+            console.log("Compartilhar fluxo")
             break
         }
       }
@@ -325,10 +495,6 @@ export default function PlansPage() {
           setEdgeType={setEdgeType}
           markerType={markerType}
           setMarkerType={setMarkerType}
-          isAddNodeDialogOpen={isAddNodeDialogOpen}
-          setIsAddNodeDialogOpen={setIsAddNodeDialogOpen}
-          newNodeLabel={newNodeLabel}
-          setNewNodeLabel={setNewNodeLabel}
           nodeCounter={nodeCounter}
           setNodeCounter={setNodeCounter}
           handleDeleteSelected={handleDeleteSelected}
@@ -340,112 +506,6 @@ export default function PlansPage() {
           selectedTool={selectedTool}
           setSelectedTool={setSelectedTool}
         />
-
-      {/* Add Node Dialog */}
-      <Dialog open={isAddNodeDialogOpen} onOpenChange={setIsAddNodeDialogOpen}>
-        <DialogContent className="sm:max-w-[400px] rounded-3xl border-border/50">
-          <DialogHeader className="space-y-3">
-            <DialogTitle className="text-2xl font-bold">Adicionar Novo Nó</DialogTitle>
-            <DialogDescription className="text-base">
-              Digite o nome do nó que deseja adicionar ao fluxo.
-            </DialogDescription>
-          </DialogHeader>
-          <div className="grid gap-4 py-4">
-            <div className="grid gap-2">
-              <Label htmlFor="nodeLabel" className="text-sm font-semibold">
-                Nome do Nó
-              </Label>
-              <Input
-                id="nodeLabel"
-                placeholder="Ex: Estratégia de Marketing"
-                value={newNodeLabel}
-                onChange={(e) => setNewNodeLabel(e.target.value)}
-                onKeyPress={(e) => {
-                  if (e.key === "Enter") {
-                    handleAddNode()
-                  }
-                }}
-                className="h-11 rounded-xl border-border/50 focus-visible:ring-primary"
-                autoFocus
-              />
-            </div>
-          </div>
-          <DialogFooter className="gap-2">
-            <Button
-              variant="outline"
-              onClick={() => {
-                setIsAddNodeDialogOpen(false)
-                setNewNodeLabel("")
-              }}
-              className="h-11 rounded-xl"
-            >
-              Cancelar
-            </Button>
-            <Button
-              onClick={handleAddNode}
-              disabled={!newNodeLabel.trim()}
-              className="h-11 rounded-xl shadow-lg hover:shadow-xl transition-all"
-              style={{ backgroundColor: "#23b559", color: "white" }}
-            >
-              Adicionar
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
-
-      {/* Context Menu */}
-      {contextMenu && (
-        <>
-          <div
-            className="fixed inset-0 z-30"
-            onClick={() => setContextMenu(null)}
-          />
-          <DropdownMenu open={!!contextMenu} onOpenChange={() => setContextMenu(null)}>
-            <DropdownMenuContent
-              style={{
-                position: "fixed",
-                left: contextMenu.x,
-                top: contextMenu.y,
-              }}
-              className="w-48"
-            >
-              {contextMenu.nodeId ? (
-                <>
-                  <DropdownMenuLabel>Ações do Nó</DropdownMenuLabel>
-                  <DropdownMenuItem onClick={() => handleContextMenuAction("duplicate")}>
-                    <Copy className="h-4 w-4 mr-2" />
-                    Duplicar
-                  </DropdownMenuItem>
-                  <DropdownMenuItem onClick={() => handleContextMenuAction("copy")}>
-                    <Copy className="h-4 w-4 mr-2" />
-                    Copiar
-                  </DropdownMenuItem>
-                  <DropdownMenuSeparator />
-                  <DropdownMenuItem
-                    onClick={() => handleContextMenuAction("delete")}
-                    className="text-destructive focus:text-destructive"
-                  >
-                    <Trash2 className="h-4 w-4 mr-2" />
-                    Deletar
-                  </DropdownMenuItem>
-                </>
-              ) : (
-                <>
-                  <DropdownMenuLabel>Ações do Canvas</DropdownMenuLabel>
-                  <DropdownMenuItem onClick={() => handleContextMenuAction("addNode")}>
-                    <Plus className="h-4 w-4 mr-2" />
-                    Adicionar Nó
-                  </DropdownMenuItem>
-                  <DropdownMenuItem onClick={() => handleContextMenuAction("paste")}>
-                    <Copy className="h-4 w-4 mr-2" />
-                    Colar
-                  </DropdownMenuItem>
-                </>
-              )}
-            </DropdownMenuContent>
-          </DropdownMenu>
-        </>
-      )}
       </div>
     </ReactFlowProvider>
   )

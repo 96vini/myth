@@ -2,14 +2,9 @@
 
 import { Button } from "@/components/ui/button"
 import { Submenu } from "./submenu"
-import { Square, Circle, Hexagon, Diamond, LucideIcon } from "lucide-react"
+import { NODE_TYPES } from "./constants/node-types"
 
-const nodeTypes = {
-  rectangle: { label: "Retângulo", icon: Square },
-  circle: { label: "Círculo", icon: Circle },
-  diamond: { label: "Losango", icon: Diamond },
-  hexagon: { label: "Hexágono", icon: Hexagon },
-}
+const nodeTypes = NODE_TYPES
 
 interface NodeTypeSubmenuProps {
   isOpen: boolean
@@ -19,20 +14,23 @@ interface NodeTypeSubmenuProps {
 
 export function NodeTypeSubmenu({ isOpen, onClose, onSelect }: NodeTypeSubmenuProps) {
   return (
-    <Submenu isOpen={isOpen} onClose={onClose} title="Tipos de Nós">
-      {Object.entries(nodeTypes).map(([key, { label, icon: Icon }]) => (
+    <Submenu isOpen={isOpen} onClose={onClose} title="Elementos do Fluxo">
+      {Object.entries(nodeTypes).map(([key, { label, icon: Icon, description }]) => (
         <Button
           key={key}
           variant="ghost"
           size="sm"
-          className="justify-start h-9 px-2"
+          className="justify-start h-auto py-2 px-2 flex-col items-start"
           onClick={() => {
             onSelect(key as keyof typeof nodeTypes)
             onClose()
           }}
         >
-          <Icon className="h-4 w-4 mr-2" />
-          {label}
+          <div className="flex items-center w-full">
+            <Icon className="h-4 w-4 mr-2" />
+            <span className="font-medium">{label}</span>
+          </div>
+          <span className="text-xs text-muted-foreground mt-0.5 ml-6">{description}</span>
         </Button>
       ))}
     </Submenu>
