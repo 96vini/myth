@@ -6,21 +6,21 @@ import { cn } from "@/lib/utils"
 import { MessageCircle } from "lucide-react"
 import type { SourceNodeData, LeadPayload } from "../../types/node.types"
 
-export function WhatsAppSourceNode({ id, data, selected }: NodeProps<SourceNodeData>) {
-  const [isEditing, setIsEditing] = useState(data.isEditing || false)
-  const [label, setLabel] = useState(data.label || "WhatsApp")
+export function WhatsAppSourceNode({ id, data, selected }: NodeProps) {
+  const [isEditing, setIsEditing] = useState((data?.isEditing as boolean) || false)
+  const [label, setLabel] = useState((data?.label as string) || "WhatsApp")
   const inputRef = useRef<HTMLInputElement>(null)
   const { updateNodeData } = useReactFlow()
 
   useEffect(() => {
-    if (data.label !== undefined) {
-      setLabel(data.label)
+    if (data?.label !== undefined) {
+      setLabel(data.label as string)
     }
   }, [data.label])
 
   useEffect(() => {
-    if (data.isEditing !== undefined) {
-      setIsEditing(data.isEditing)
+    if (data?.isEditing !== undefined) {
+      setIsEditing(data.isEditing as boolean)
     }
   }, [data.isEditing])
 
@@ -40,7 +40,7 @@ export function WhatsAppSourceNode({ id, data, selected }: NodeProps<SourceNodeD
     setIsEditing(false)
     updateNodeData(id, {
       ...data,
-      label: label.trim() || "WhatsApp",
+      label: (label as string).trim() || "WhatsApp",
       isEditing: false,
     })
   }
@@ -51,7 +51,7 @@ export function WhatsAppSourceNode({ id, data, selected }: NodeProps<SourceNodeD
       handleBlur()
     }
     if (e.key === "Escape") {
-      setLabel(data.label || "WhatsApp")
+      setLabel((data?.label as string) || "WhatsApp")
       setIsEditing(false)
       updateNodeData(id, { ...data, isEditing: false })
     }
@@ -75,7 +75,7 @@ export function WhatsAppSourceNode({ id, data, selected }: NodeProps<SourceNodeD
         <input
           ref={inputRef}
           type="text"
-          value={label}
+          value={label as string}
           onChange={(e) => setLabel(e.target.value)}
           onBlur={handleBlur}
           onKeyDown={handleKeyDown}

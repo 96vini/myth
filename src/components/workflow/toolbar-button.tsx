@@ -1,5 +1,6 @@
 "use client"
 
+import { memo } from "react"
 import { Button } from "@/components/ui/button"
 import { LucideIcon } from "lucide-react"
 import { cn } from "@/lib/utils"
@@ -14,7 +15,7 @@ interface ToolbarButtonProps {
   variant?: "default" | "ghost"
 }
 
-export function ToolbarButton({
+function ToolbarButtonComponent({
   icon: Icon,
   label,
   onClick,
@@ -29,7 +30,7 @@ export function ToolbarButton({
         variant={variant}
         size="icon"
         className={cn(
-          "h-10 w-10 rounded-lg transition-all",
+          "h-10 w-10 md:h-10 md:w-10 rounded-lg transition-all flex-shrink-0",
           isActive && "bg-[#23b559] text-white hover:bg-[#23b559] hover:text-white"
         )}
         onClick={onClick}
@@ -47,4 +48,6 @@ export function ToolbarButton({
     </div>
   )
 }
+
+export const ToolbarButton = memo(ToolbarButtonComponent)
 

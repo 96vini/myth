@@ -6,21 +6,21 @@ import { cn } from "@/lib/utils"
 import { CheckCircle2 } from "lucide-react"
 import type { QualificationNodeData } from "../types/sales-flow.types"
 
-export function QualificationNode({ id, data, selected }: NodeProps<QualificationNodeData>) {
-  const [isEditing, setIsEditing] = useState(data.isEditing || false)
-  const [label, setLabel] = useState(data.label || "Qualificação")
+export function QualificationNode({ id, data, selected }: NodeProps) {
+  const [isEditing, setIsEditing] = useState((data?.isEditing as boolean) || false)
+  const [label, setLabel] = useState((data?.label as string) || "Qualificação")
   const inputRef = useRef<HTMLInputElement>(null)
   const { updateNodeData } = useReactFlow()
 
   useEffect(() => {
-    if (data.label !== undefined) {
-      setLabel(data.label)
+    if (data?.label !== undefined) {
+      setLabel(data.label as string)
     }
   }, [data.label])
 
   useEffect(() => {
-    if (data.isEditing !== undefined) {
-      setIsEditing(data.isEditing)
+    if (data?.isEditing !== undefined) {
+      setIsEditing(data.isEditing as boolean)
     }
   }, [data.isEditing])
 
@@ -40,7 +40,7 @@ export function QualificationNode({ id, data, selected }: NodeProps<Qualificatio
     setIsEditing(false)
     updateNodeData(id, {
       ...data,
-      label: label.trim() || "Qualificação",
+      label: (label as string).trim() || "Qualificação",
       isEditing: false,
     })
   }
@@ -51,7 +51,7 @@ export function QualificationNode({ id, data, selected }: NodeProps<Qualificatio
       handleBlur()
     }
     if (e.key === "Escape") {
-      setLabel(data.label || "Qualificação")
+      setLabel((data?.label as string) || "Qualificação")
       setIsEditing(false)
       updateNodeData(id, { ...data, isEditing: false })
     }
@@ -76,7 +76,7 @@ export function QualificationNode({ id, data, selected }: NodeProps<Qualificatio
         <input
           ref={inputRef}
           type="text"
-          value={label}
+          value={label as string}
           onChange={(e) => setLabel(e.target.value)}
           onBlur={handleBlur}
           onKeyDown={handleKeyDown}

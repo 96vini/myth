@@ -6,21 +6,21 @@ import { cn } from "@/lib/utils"
 import { Clock } from "lucide-react"
 import type { FollowUpNodeData } from "../types/sales-flow.types"
 
-export function FollowUpNode({ id, data, selected }: NodeProps<FollowUpNodeData>) {
-  const [isEditing, setIsEditing] = useState(data.isEditing || false)
-  const [label, setLabel] = useState(data.label || "Follow-up")
+export function FollowUpNode({ id, data, selected }: NodeProps) {
+  const [isEditing, setIsEditing] = useState((data?.isEditing as boolean) || false)
+  const [label, setLabel] = useState((data?.label as string) || "Follow-up")
   const inputRef = useRef<HTMLInputElement>(null)
   const { updateNodeData } = useReactFlow()
 
   useEffect(() => {
-    if (data.label !== undefined) {
-      setLabel(data.label)
+    if (data?.label !== undefined) {
+      setLabel(data.label as string)
     }
   }, [data.label])
 
   useEffect(() => {
-    if (data.isEditing !== undefined) {
-      setIsEditing(data.isEditing)
+    if (data?.isEditing !== undefined) {
+      setIsEditing(data.isEditing as boolean)
     }
   }, [data.isEditing])
 
@@ -40,7 +40,7 @@ export function FollowUpNode({ id, data, selected }: NodeProps<FollowUpNodeData>
     setIsEditing(false)
     updateNodeData(id, {
       ...data,
-      label: label.trim() || "Follow-up",
+      label: (label as string).trim() || "Follow-up",
       isEditing: false,
     })
   }
@@ -51,7 +51,7 @@ export function FollowUpNode({ id, data, selected }: NodeProps<FollowUpNodeData>
       handleBlur()
     }
     if (e.key === "Escape") {
-      setLabel(data.label || "Follow-up")
+      setLabel((data?.label as string) || "Follow-up")
       setIsEditing(false)
       updateNodeData(id, { ...data, isEditing: false })
     }
@@ -76,7 +76,7 @@ export function FollowUpNode({ id, data, selected }: NodeProps<FollowUpNodeData>
         <input
           ref={inputRef}
           type="text"
-          value={label}
+          value={label as string}
           onChange={(e) => setLabel(e.target.value)}
           onBlur={handleBlur}
           onKeyDown={handleKeyDown}

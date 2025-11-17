@@ -1,26 +1,26 @@
 "use client"
 
-import { useState, useEffect, useRef } from "react"
+import { useState, useEffect, useRef, memo } from "react"
 import { Handle, Position, NodeProps, useReactFlow } from "@xyflow/react"
 import { cn } from "@/lib/utils"
 import { GitBranch } from "lucide-react"
 import type { DecisionNodeData } from "../../types/node.types"
 
-export function IfDecisionNode({ id, data, selected }: NodeProps<DecisionNodeData>) {
-  const [isEditing, setIsEditing] = useState(data.isEditing || false)
-  const [label, setLabel] = useState(data.label || "Se")
+function IfDecisionNodeComponent({ id, data, selected }: NodeProps) {
+  const [isEditing, setIsEditing] = useState((data?.isEditing as boolean) || false)
+  const [label, setLabel] = useState((data?.label as string) || "Se")
   const inputRef = useRef<HTMLInputElement>(null)
   const { updateNodeData } = useReactFlow()
 
   useEffect(() => {
-    if (data.label !== undefined) {
-      setLabel(data.label)
+    if (data?.label !== undefined) {
+      setLabel(data.label as string)
     }
   }, [data.label])
 
   useEffect(() => {
-    if (data.isEditing !== undefined) {
-      setIsEditing(data.isEditing)
+    if (data?.isEditing !== undefined) {
+      setIsEditing(data.isEditing as boolean)
     }
   }, [data.isEditing])
 
@@ -40,7 +40,7 @@ export function IfDecisionNode({ id, data, selected }: NodeProps<DecisionNodeDat
     setIsEditing(false)
     updateNodeData(id, {
       ...data,
-      label: label.trim() || "Se",
+      label: (label as string).trim() || "Se",
       isEditing: false,
     })
   }
@@ -51,7 +51,7 @@ export function IfDecisionNode({ id, data, selected }: NodeProps<DecisionNodeDat
       handleBlur()
     }
     if (e.key === "Escape") {
-      setLabel(data.label || "Se")
+      setLabel((data?.label as string) || "Se")
       setIsEditing(false)
       updateNodeData(id, { ...data, isEditing: false })
     }
@@ -60,10 +60,15 @@ export function IfDecisionNode({ id, data, selected }: NodeProps<DecisionNodeDat
   return (
     <div
       className={cn(
-        "px-4 py-3 shadow-md rounded-lg border-2 min-w-[150px] bg-card relative",
-        selected ? "border-orange-500 shadow-lg" : "border-border"
+        "px-4 py-3 rounded-lg border-2 min-w-[150px] bg-card relative select-none",
+        selected ? "border-orange-500" : "border-border"
       )}
       onDoubleClick={handleDoubleClick}
+      style={{ 
+        boxShadow: selected ? "0 4px 6px -1px rgba(0, 0, 0, 0.1)" : "none",
+        transition: "none",
+        willChange: "auto"
+      }}
     >
       <div className="absolute -top-2 left-1/2 -translate-x-1/2">
         <div className="bg-orange-500 text-white text-xs px-2 py-0.5 rounded-full flex items-center gap-1">
@@ -76,7 +81,7 @@ export function IfDecisionNode({ id, data, selected }: NodeProps<DecisionNodeDat
         <input
           ref={inputRef}
           type="text"
-          value={label}
+          value={label as string}
           onChange={(e) => setLabel(e.target.value)}
           onBlur={handleBlur}
           onKeyDown={handleKeyDown}
@@ -105,4 +110,6 @@ export function IfDecisionNode({ id, data, selected }: NodeProps<DecisionNodeDat
     </div>
   )
 }
+
+export const IfDecisionNode = memo(IfDecisionNodeComponent)
 

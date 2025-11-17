@@ -7,7 +7,7 @@ import { Textarea } from "@/components/ui/textarea"
 import { Checkbox } from "@/components/ui/checkbox"
 import { Separator } from "@/components/ui/separator"
 import { Badge } from "@/components/ui/badge"
-import { MessageSquare, Clock, Image, FileText, Send, Zap } from "lucide-react"
+import { Image as ImageIcon, FileText, Send, Zap } from "lucide-react"
 import { Node } from "@xyflow/react"
 import { useState } from "react"
 
@@ -18,15 +18,15 @@ interface MessageNodeConfigProps {
 
 export function MessageNodeConfig({ node, onUpdate }: MessageNodeConfigProps) {
   const [config, setConfig] = useState({
-    messageType: node.data?.messageType || "text",
-    content: node.data?.content || "",
-    delay: node.data?.delay || 0,
-    enablePersonalization: node.data?.enablePersonalization ?? true,
-    enableMedia: node.data?.enableMedia ?? false,
-    mediaUrl: node.data?.mediaUrl || "",
-    enableButtons: node.data?.enableButtons ?? false,
-    buttonText: node.data?.buttonText || "",
-    enableTracking: node.data?.enableTracking ?? true,
+    messageType: (node.data?.messageType as string) || "text",
+    content: (node.data?.content as string) || "",
+    delay: (node.data?.delay as number) || 0,
+    enablePersonalization: (node.data?.enablePersonalization as boolean) ?? true,
+    enableMedia: (node.data?.enableMedia as boolean) ?? false,
+    mediaUrl: (node.data?.mediaUrl as string) || "",
+    enableButtons: (node.data?.enableButtons as boolean) ?? false,
+    buttonText: (node.data?.buttonText as string) || "",
+    enableTracking: (node.data?.enableTracking as boolean) ?? true,
   })
 
   const updateConfig = (key: string, value: any) => {
@@ -46,7 +46,7 @@ export function MessageNodeConfig({ node, onUpdate }: MessageNodeConfigProps) {
     <div className="space-y-4">
       <div>
         <Label className="text-sm font-medium">Tipo de Mensagem</Label>
-        <Select value={config.messageType} onValueChange={(v) => updateConfig("messageType", v)}>
+        <Select value={config.messageType as string} onValueChange={(v) => updateConfig("messageType", v)}>
           <SelectTrigger className="mt-2">
             <SelectValue />
           </SelectTrigger>
@@ -85,7 +85,7 @@ export function MessageNodeConfig({ node, onUpdate }: MessageNodeConfigProps) {
       <div>
         <Label className="text-sm font-medium">Conteúdo da Mensagem</Label>
         <Textarea
-          value={config.content}
+          value={config.content as string}
           onChange={(e) => updateConfig("content", e.target.value)}
           className="mt-2 min-h-[120px]"
           placeholder="Digite sua mensagem aqui..."
@@ -95,7 +95,7 @@ export function MessageNodeConfig({ node, onUpdate }: MessageNodeConfigProps) {
             Variáveis: {"{"}nome{"}"}, {"{"}empresa{"}"}, {"{"}produto{"}"}
           </p>
           <Badge variant="outline" className="text-xs">
-            {config.content.length} caracteres
+            {(config.content as string).length} caracteres
           </Badge>
         </div>
       </div>
@@ -106,7 +106,7 @@ export function MessageNodeConfig({ node, onUpdate }: MessageNodeConfigProps) {
         <Label className="text-sm font-medium">Atraso de Envio (segundos)</Label>
         <Input
           type="number"
-          value={config.delay}
+          value={config.delay as number}
           onChange={(e) => updateConfig("delay", parseInt(e.target.value) || 0)}
           className="mt-2"
           min={0}
@@ -126,7 +126,7 @@ export function MessageNodeConfig({ node, onUpdate }: MessageNodeConfigProps) {
             <Label className="text-sm font-medium">Personalização</Label>
           </div>
           <Checkbox
-            checked={config.enablePersonalization}
+            checked={config.enablePersonalization as boolean}
             onCheckedChange={(checked) => updateConfig("enablePersonalization", checked)}
           />
         </div>
@@ -136,11 +136,11 @@ export function MessageNodeConfig({ node, onUpdate }: MessageNodeConfigProps) {
 
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <Image className="h-4 w-4 text-muted-foreground" />
+            <ImageIcon className="h-4 w-4 text-muted-foreground" />
             <Label className="text-sm font-medium">Incluir Mídia</Label>
           </div>
           <Checkbox
-            checked={config.enableMedia}
+            checked={config.enableMedia as boolean}
             onCheckedChange={(checked) => updateConfig("enableMedia", checked)}
           />
         </div>
@@ -149,7 +149,7 @@ export function MessageNodeConfig({ node, onUpdate }: MessageNodeConfigProps) {
           <div>
             <Label className="text-sm font-medium">URL da Mídia</Label>
             <Input
-              value={config.mediaUrl}
+              value={config.mediaUrl as string}
               onChange={(e) => updateConfig("mediaUrl", e.target.value)}
               className="mt-2"
               placeholder="https://..."
@@ -163,7 +163,7 @@ export function MessageNodeConfig({ node, onUpdate }: MessageNodeConfigProps) {
             <Label className="text-sm font-medium">Botões de Ação</Label>
           </div>
           <Checkbox
-            checked={config.enableButtons}
+            checked={config.enableButtons as boolean}
             onCheckedChange={(checked) => updateConfig("enableButtons", checked)}
           />
         </div>
@@ -172,7 +172,7 @@ export function MessageNodeConfig({ node, onUpdate }: MessageNodeConfigProps) {
           <div>
             <Label className="text-sm font-medium">Texto do Botão</Label>
             <Input
-              value={config.buttonText}
+              value={config.buttonText as string}
               onChange={(e) => updateConfig("buttonText", e.target.value)}
               className="mt-2"
               placeholder="Ex: Fale com um especialista"
@@ -186,7 +186,7 @@ export function MessageNodeConfig({ node, onUpdate }: MessageNodeConfigProps) {
             <Label className="text-sm font-medium">Rastreamento</Label>
           </div>
           <Checkbox
-            checked={config.enableTracking}
+            checked={config.enableTracking as boolean}
             onCheckedChange={(checked) => updateConfig("enableTracking", checked)}
           />
         </div>

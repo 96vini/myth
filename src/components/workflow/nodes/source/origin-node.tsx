@@ -1,34 +1,34 @@
 "use client"
 
-import { useState, useEffect, useRef } from "react"
+import { useState, useEffect, useRef, memo } from "react"
 import { Handle, Position, NodeProps, useReactFlow } from "@xyflow/react"
 import { cn } from "@/lib/utils"
 import { PlayCircle } from "lucide-react"
 import { ORIGIN_ICONS, ORIGIN_LABELS } from "../../constants/node-types"
 
-export function OriginNode({ id, data, selected }: NodeProps) {
-  const [isEditing, setIsEditing] = useState(data.isEditing || false)
-  const originType = data?.originType || "whatsapp"
-  const displayLabel = data?.label || ORIGIN_LABELS[originType] || "Origem"
+function OriginNodeComponent({ id, data, selected }: NodeProps) {
+  const [isEditing, setIsEditing] = useState((data?.isEditing as boolean) || false)
+  const originType = (data?.originType as string) || "whatsapp"
+  const displayLabel = (data?.label as string) || ORIGIN_LABELS[originType as keyof typeof ORIGIN_LABELS] || "Origem"
   const [label, setLabel] = useState(displayLabel)
   const inputRef = useRef<HTMLInputElement>(null)
   const { updateNodeData } = useReactFlow()
   
-  const Icon = ORIGIN_ICONS[originType] || PlayCircle
-  const originLabel = ORIGIN_LABELS[originType]?.toUpperCase() || "ORIGEM"
+  const Icon = ORIGIN_ICONS[originType as keyof typeof ORIGIN_ICONS] || PlayCircle
+  const originLabel = ORIGIN_LABELS[originType as keyof typeof ORIGIN_LABELS]?.toUpperCase() || "ORIGEM"
 
   useEffect(() => {
-    const currentOriginType = data?.originType || "whatsapp"
-    if (data.label !== undefined) {
-      setLabel(data.label)
+    const currentOriginType = (data?.originType as string) || "whatsapp"
+    if (data?.label !== undefined) {
+      setLabel(data.label as string)
     } else if (data?.originType) {
-      setLabel(ORIGIN_LABELS[currentOriginType] || "Origem")
+      setLabel(ORIGIN_LABELS[currentOriginType as keyof typeof ORIGIN_LABELS] || "Origem")
     }
   }, [data.label, data?.originType])
 
   useEffect(() => {
-    if (data.isEditing !== undefined) {
-      setIsEditing(data.isEditing)
+    if (data?.isEditing !== undefined) {
+      setIsEditing(data.isEditing as boolean)
     }
   }, [data.isEditing])
 
@@ -48,7 +48,7 @@ export function OriginNode({ id, data, selected }: NodeProps) {
     setIsEditing(false)
     updateNodeData(id, {
       ...data,
-      label: label.trim() || "Origem",
+      label: (label as string).trim() || "Origem",
       isEditing: false,
     })
   }
@@ -59,7 +59,7 @@ export function OriginNode({ id, data, selected }: NodeProps) {
       handleBlur()
     }
     if (e.key === "Escape") {
-      setLabel(data.label || "Origem")
+      setLabel((data?.label as string) || "Origem")
       setIsEditing(false)
       updateNodeData(id, { ...data, isEditing: false })
     }
@@ -68,10 +68,15 @@ export function OriginNode({ id, data, selected }: NodeProps) {
   return (
     <div
       className={cn(
-        "px-4 py-3 shadow-md rounded-lg border-2 min-w-[150px] bg-card relative",
-        selected ? "border-[#23b559] shadow-lg" : "border-border"
+        "px-4 py-3 rounded-lg border-2 min-w-[150px] bg-card relative select-none",
+        selected ? "border-[#23b559]" : "border-border"
       )}
       onDoubleClick={handleDoubleClick}
+      style={{ 
+        boxShadow: selected ? "0 4px 6px -1px rgba(0, 0, 0, 0.1)" : "none",
+        transition: "none",
+        willChange: "auto"
+      }}
     >
       <div className="absolute -top-2 left-1/2 -translate-x-1/2">
         <div className="bg-[#23b559] text-white text-xs px-2 py-0.5 rounded-full flex items-center gap-1">
@@ -83,7 +88,7 @@ export function OriginNode({ id, data, selected }: NodeProps) {
         <input
           ref={inputRef}
           type="text"
-          value={label}
+          value={label as string}
           onChange={(e) => setLabel(e.target.value)}
           onBlur={handleBlur}
           onKeyDown={handleKeyDown}
@@ -99,4 +104,6 @@ export function OriginNode({ id, data, selected }: NodeProps) {
     </div>
   )
 }
+
+export const OriginNode = memo(OriginNodeComponent)
 

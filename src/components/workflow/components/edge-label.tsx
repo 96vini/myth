@@ -1,8 +1,9 @@
 "use client"
 
+import { memo, useMemo } from "react"
 import { getBezierPath, EdgeLabelRenderer, BaseEdge, type EdgeProps } from "@xyflow/react"
 
-export function EdgeLabel({
+function EdgeLabelComponent({
   id,
   sourceX,
   sourceY,
@@ -14,18 +15,21 @@ export function EdgeLabel({
   markerEnd,
   data,
 }: EdgeProps) {
-  const [edgePath, labelX, labelY] = getBezierPath({
-    sourceX,
-    sourceY,
-    sourcePosition,
-    targetX,
-    targetY,
-    targetPosition,
-  })
+  const [edgePath, labelX, labelY] = useMemo(
+    () => getBezierPath({
+      sourceX,
+      sourceY,
+      sourcePosition,
+      targetX,
+      targetY,
+      targetPosition,
+    }),
+    [sourceX, sourceY, sourcePosition, targetX, targetY, targetPosition]
+  )
 
-  const label = data?.label || data?.condition || ""
-  const isNegation = data?.isNegation || label === "Não"
-  const labelColor = isNegation ? "#ED333E" : "#23b559"
+  const label = useMemo(() => (data?.label as string) || (data?.condition as string) || "", [data?.label, data?.condition])
+  const isNegation = useMemo(() => (data?.isNegation as boolean) || label === "Não", [data?.isNegation, label])
+  const labelColor = useMemo(() => isNegation ? "#ED333E" : "#23b559", [isNegation])
 
   return (
     <>
@@ -53,4 +57,6 @@ export function EdgeLabel({
     </>
   )
 }
+
+export const EdgeLabel = memo(EdgeLabelComponent)
 

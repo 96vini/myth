@@ -6,21 +6,21 @@ import { cn } from "@/lib/utils"
 import { Tags } from "lucide-react"
 import type { ProcessingNodeData } from "../../types/node.types"
 
-export function LeadClassifierNode({ id, data, selected }: NodeProps<ProcessingNodeData>) {
-  const [isEditing, setIsEditing] = useState(data.isEditing || false)
-  const [label, setLabel] = useState(data.label || "Classificar Lead")
+export function LeadClassifierNode({ id, data, selected }: NodeProps) {
+  const [isEditing, setIsEditing] = useState((data?.isEditing as boolean) || false)
+  const [label, setLabel] = useState((data?.label as string) || "Classificar Lead")
   const inputRef = useRef<HTMLInputElement>(null)
   const { updateNodeData } = useReactFlow()
 
   useEffect(() => {
-    if (data.label !== undefined) {
-      setLabel(data.label)
+    if (data?.label !== undefined) {
+      setLabel(data.label as string)
     }
   }, [data.label])
 
   useEffect(() => {
-    if (data.isEditing !== undefined) {
-      setIsEditing(data.isEditing)
+    if (data?.isEditing !== undefined) {
+      setIsEditing(data.isEditing as boolean)
     }
   }, [data.isEditing])
 
@@ -40,7 +40,7 @@ export function LeadClassifierNode({ id, data, selected }: NodeProps<ProcessingN
     setIsEditing(false)
     updateNodeData(id, {
       ...data,
-      label: label.trim() || "Classificar Lead",
+      label: (label as string).trim() || "Classificar Lead",
       isEditing: false,
     })
   }
@@ -51,7 +51,7 @@ export function LeadClassifierNode({ id, data, selected }: NodeProps<ProcessingN
       handleBlur()
     }
     if (e.key === "Escape") {
-      setLabel(data.label || "Classificar Lead")
+      setLabel((data?.label as string) || "Classificar Lead")
       setIsEditing(false)
       updateNodeData(id, { ...data, isEditing: false })
     }
@@ -76,7 +76,7 @@ export function LeadClassifierNode({ id, data, selected }: NodeProps<ProcessingN
         <input
           ref={inputRef}
           type="text"
-          value={label}
+          value={label as string}
           onChange={(e) => setLabel(e.target.value)}
           onBlur={handleBlur}
           onKeyDown={handleKeyDown}

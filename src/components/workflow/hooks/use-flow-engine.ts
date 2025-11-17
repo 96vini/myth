@@ -137,7 +137,7 @@ export function useFlowEngine() {
 
   const getNodeCategory = useCallback((nodeType: FlowNodeType): string | null => {
     for (const [category, types] of Object.entries(NODE_CATEGORIES)) {
-      if (types.includes(nodeType as any)) {
+      if ((types as readonly string[]).includes(nodeType as string)) {
         return category
       }
     }

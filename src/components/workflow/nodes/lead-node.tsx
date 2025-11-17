@@ -6,21 +6,21 @@ import { cn } from "@/lib/utils"
 import { UserCheck } from "lucide-react"
 import type { LeadNodeData } from "../types/sales-flow.types"
 
-export function LeadNode({ id, data, selected }: NodeProps<LeadNodeData>) {
-  const [isEditing, setIsEditing] = useState(data.isEditing || false)
-  const [label, setLabel] = useState(data.label || "Lead")
+export function LeadNode({ id, data, selected }: NodeProps) {
+  const [isEditing, setIsEditing] = useState((data?.isEditing as boolean) || false)
+  const [label, setLabel] = useState((data?.label as string) || "Lead")
   const inputRef = useRef<HTMLInputElement>(null)
   const { updateNodeData } = useReactFlow()
 
   useEffect(() => {
-    if (data.label !== undefined) {
-      setLabel(data.label)
+    if (data?.label !== undefined) {
+      setLabel(data.label as string)
     }
   }, [data.label])
 
   useEffect(() => {
-    if (data.isEditing !== undefined) {
-      setIsEditing(data.isEditing)
+    if (data?.isEditing !== undefined) {
+      setIsEditing(data.isEditing as boolean)
     }
   }, [data.isEditing])
 
@@ -40,7 +40,7 @@ export function LeadNode({ id, data, selected }: NodeProps<LeadNodeData>) {
     setIsEditing(false)
     updateNodeData(id, {
       ...data,
-      label: label.trim() || "Lead",
+      label: (label as string).trim() || "Lead",
       isEditing: false,
     })
   }
@@ -51,7 +51,7 @@ export function LeadNode({ id, data, selected }: NodeProps<LeadNodeData>) {
       handleBlur()
     }
     if (e.key === "Escape") {
-      setLabel(data.label || "Lead")
+      setLabel((data?.label as string) || "Lead")
       setIsEditing(false)
       updateNodeData(id, { ...data, isEditing: false })
     }
@@ -76,7 +76,7 @@ export function LeadNode({ id, data, selected }: NodeProps<LeadNodeData>) {
         <input
           ref={inputRef}
           type="text"
-          value={label}
+          value={label as string}
           onChange={(e) => setLabel(e.target.value)}
           onBlur={handleBlur}
           onKeyDown={handleKeyDown}

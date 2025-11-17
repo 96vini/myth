@@ -34,7 +34,7 @@ export function OriginNodeConfig({ node, onUpdate }: OriginNodeConfigProps) {
     <div className="space-y-4">
       <div>
         <Label className="text-sm font-medium">Tipo de Origem</Label>
-        <Select value={config.originType} onValueChange={(v) => updateConfig("originType", v)}>
+        <Select value={config.originType as string} onValueChange={(v) => updateConfig("originType", v)}>
           <SelectTrigger className="mt-2">
             <SelectValue />
           </SelectTrigger>
@@ -66,7 +66,7 @@ export function OriginNodeConfig({ node, onUpdate }: OriginNodeConfigProps) {
 
       <div>
         <Label className="text-sm font-medium">Método de Captura</Label>
-        <Select value={config.captureMethod} onValueChange={(v) => updateConfig("captureMethod", v)}>
+        <Select value={config.captureMethod as string} onValueChange={(v) => updateConfig("captureMethod", v)}>
           <SelectTrigger className="mt-2">
             <SelectValue />
           </SelectTrigger>
@@ -89,7 +89,7 @@ export function OriginNodeConfig({ node, onUpdate }: OriginNodeConfigProps) {
         <div className="flex items-center justify-between">
           <Label className="text-sm font-medium">Qualificação Automática</Label>
           <Checkbox
-            checked={config.autoQualify}
+            checked={config.autoQualify as boolean}
             onCheckedChange={(checked) => updateConfig("autoQualify", checked)}
           />
         </div>
@@ -103,7 +103,7 @@ export function OriginNodeConfig({ node, onUpdate }: OriginNodeConfigProps) {
           <Label className="text-sm font-medium">Score Mínimo</Label>
           <Input
             type="number"
-            value={config.minScore}
+            value={config.minScore as number}
             onChange={(e) => updateConfig("minScore", parseInt(e.target.value) || 0)}
             className="mt-2"
             min={0}
@@ -123,20 +123,20 @@ export function OriginNodeConfig({ node, onUpdate }: OriginNodeConfigProps) {
           {REQUIRED_FIELDS.map((field) => (
             <div key={field.value} className="flex items-center gap-2">
               <Checkbox
-                checked={config.requiredFields.includes(field.value)}
+                checked={(config.requiredFields as string[]).includes(field.value)}
                 onCheckedChange={(checked) => {
                   const newFields = checked
-                    ? [...config.requiredFields, field.value]
-                    : config.requiredFields.filter((f) => f !== field.value)
+                    ? [...(config.requiredFields as string[]), field.value]
+                    : (config.requiredFields as string[]).filter((f: string) => f !== field.value)
                   updateConfig("requiredFields", newFields)
                 }}
               />
               <Label
                 className="text-sm cursor-pointer"
                 onClick={() => {
-                  const newFields = config.requiredFields.includes(field.value)
-                    ? config.requiredFields.filter((f) => f !== field.value)
-                    : [...config.requiredFields, field.value]
+                  const newFields = (config.requiredFields as string[]).includes(field.value)
+                    ? (config.requiredFields as string[]).filter((f: string) => f !== field.value)
+                    : [...(config.requiredFields as string[]), field.value]
                   updateConfig("requiredFields", newFields)
                 }}
               >

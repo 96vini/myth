@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useCallback } from "react"
+import { useState, useCallback, useMemo, memo } from "react"
 import { usePathname, useRouter } from "next/navigation"
 import {
   Home,
@@ -68,7 +68,7 @@ const dockItems: (DockItem | { id: string; separator: true; icon?: never; label:
   },
 ]
 
-export function Dock() {
+function DockComponent() {
   const [hoveredIndex, setHoveredIndex] = useState<number | null>(null)
   const pathname = usePathname()
   const router = useRouter()
@@ -86,66 +86,77 @@ export function Dock() {
     }
   }, [router])
 
+  const handleMouseLeave = useCallback(() => setHoveredIndex(null), [])
+  const handleMouseEnter = useCallback((index: number) => setHoveredIndex(index), [])
+
   return (
     <div className="relative inline-flex mt-5">
       {/* Dock Container */}
       <div
-        className="relative rounded-2xl bg-background/60 backdrop-blur-xl border border-border/10 shadow-xl"
-        onMouseLeave={() => setHoveredIndex(null)}
+        className="relative rounded-2xl bg-muted/60 border border-border/60 shadow-xl backdrop-blur-sm transition-all duration-300 hover:shadow-2xl hover:bg-muted/70"
+        onMouseLeave={handleMouseLeave}
       >
         {/* Dock Items */}
-        <div className="relative flex items-center gap-1.5 px-2 py-2 bg-background/30 backdrop-blur-2xl shadow-[0_8px_32px_0_rgba(0,0,0,0.12)]">
-          <div className="absolute inset-0 rounded-2xl bg-gradient-to-b from-white/5 to-transparent pointer-events-none" />
+        <div className="relative flex items-center gap-1.5 px-3 py-2.5">
           {dockItems.map((item, index) => {
             if (item.separator) {
               return (
                 <div
                   key={item.id}
-                  className="w-px h-10 bg-border/20 mx-1"
+                  className="w-px h-10 bg-border/50 mx-1 transition-opacity duration-300"
                 />
               )
             }
 
             const Icon = item.icon
             const active = isActive(item.href)
+            const isHovered = hoveredIndex === index
 
             return (
               <div
                 key={item.id}
                 className="relative z-10 flex flex-col items-center"
-                onMouseEnter={() => setHoveredIndex(index)}
+                onMouseEnter={() => handleMouseEnter(index)}
               >
                 {/* Icon Container */}
                 <button
                   onClick={() => handleClick(item)}
                   className={cn(
-                    "relative flex items-center justify-center w-11 h-11 rounded-xl transition-all duration-200",
-                    "hover:bg-muted/50",
-                    active && "bg-primary hover:bg-primary/90"
+                    "relative flex items-center justify-center w-11 h-11 rounded-xl transition-all duration-200 ease-out",
+                    "hover:bg-accent/60 hover:scale-110 active:scale-95",
+                    active && "bg-primary hover:bg-primary/90 scale-105",
+                    isHovered && !active && "scale-110"
                   )}
                 >
                   {/* Active Indicator */}
                   {active && (
-                    <div className="absolute -top-0.5 left-1/2 -translate-x-1/2 w-1 h-1 rounded-full bg-primary-foreground" />
+                    <div className="absolute -top-0.5 left-1/2 -translate-x-1/2 w-1 h-1 rounded-full bg-primary-foreground animate-in fade-in-0 zoom-in-95 duration-200" />
+                  )}
+
+                  {/* Hover Glow Effect */}
+                  {isHovered && !active && (
+                    <div className="absolute inset-0 rounded-xl bg-primary/10 blur-md -z-10 animate-in fade-in-0 zoom-in-95 duration-200" />
                   )}
 
                   {/* Icon */}
                   <Icon
                     className={cn(
-                      "transition-colors duration-200",
+                      "transition-all duration-200",
                       active 
-                        ? "text-primary-foreground" 
-                        : "text-foreground/60 hover:text-foreground"
+                        ? "text-primary-foreground scale-110" 
+                        : "text-foreground/70 hover:text-foreground",
+                      isHovered && !active && "scale-110"
                     )}
                     size={20}
-                    strokeWidth={2}
+                    strokeWidth={active ? 2.5 : 2}
                   />
                 </button>
 
                 {/* Tooltip */}
-                {hoveredIndex === index && (
-                  <div className="absolute -bottom-10 px-2.5 py-1 rounded-lg bg-background/90 backdrop-blur-sm border border-border/50 shadow-lg text-xs font-medium whitespace-nowrap animate-in fade-in-0 zoom-in-95 duration-100">
+                {isHovered && (
+                  <div className="absolute -bottom-11 px-3 py-1.5 rounded-lg bg-popover border border-border shadow-xl text-xs font-medium whitespace-nowrap animate-in fade-in-0 zoom-in-95 duration-200 z-50 pointer-events-none">
                     {item.label}
+                    <div className="absolute -top-1 left-1/2 -translate-x-1/2 w-2 h-2 rotate-45 bg-popover border-l border-t border-border" />
                   </div>
                 )}
               </div>
@@ -156,4 +167,6 @@ export function Dock() {
     </div>
   )
 }
+
+export const Dock = memo(DockComponent)
 

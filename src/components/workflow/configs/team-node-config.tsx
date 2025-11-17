@@ -17,13 +17,13 @@ interface TeamNodeConfigProps {
 
 export function TeamNodeConfig({ node, onUpdate }: TeamNodeConfigProps) {
   const [config, setConfig] = useState({
-    assignTo: node.data?.assignTo || "auto",
-    priority: node.data?.priority || "normal",
-    maxConcurrent: node.data?.maxConcurrent || 5,
-    responseTime: node.data?.responseTime || 5,
-    enableNotifications: node.data?.enableNotifications ?? true,
-    enableMetrics: node.data?.enableMetrics ?? true,
-    teamMembers: node.data?.teamMembers || [],
+    assignTo: (node.data?.assignTo as string) || "auto",
+    priority: (node.data?.priority as string) || "normal",
+    maxConcurrent: (node.data?.maxConcurrent as number) || 5,
+    responseTime: (node.data?.responseTime as number) || 5,
+    enableNotifications: (node.data?.enableNotifications as boolean) ?? true,
+    enableMetrics: (node.data?.enableMetrics as boolean) ?? true,
+    teamMembers: (node.data?.teamMembers as any[]) || [],
   })
 
   const updateConfig = (key: string, value: any) => {
@@ -43,7 +43,7 @@ export function TeamNodeConfig({ node, onUpdate }: TeamNodeConfigProps) {
     <div className="space-y-4">
       <div>
         <Label className="text-sm font-medium">Atribuição</Label>
-        <Select value={config.assignTo} onValueChange={(v) => updateConfig("assignTo", v)}>
+        <Select value={config.assignTo as string} onValueChange={(v) => updateConfig("assignTo", v)}>
           <SelectTrigger className="mt-2">
             <SelectValue />
           </SelectTrigger>
@@ -63,7 +63,7 @@ export function TeamNodeConfig({ node, onUpdate }: TeamNodeConfigProps) {
 
       <div>
         <Label className="text-sm font-medium">Prioridade</Label>
-        <Select value={config.priority} onValueChange={(v) => updateConfig("priority", v)}>
+        <Select value={config.priority as string} onValueChange={(v) => updateConfig("priority", v)}>
           <SelectTrigger className="mt-2">
             <SelectValue />
           </SelectTrigger>
@@ -81,7 +81,7 @@ export function TeamNodeConfig({ node, onUpdate }: TeamNodeConfigProps) {
           <Label className="text-sm font-medium">Máx. Simultâneos</Label>
           <Input
             type="number"
-            value={config.maxConcurrent}
+            value={config.maxConcurrent as number}
             onChange={(e) => updateConfig("maxConcurrent", parseInt(e.target.value) || 0)}
             className="mt-2"
             min={1}
@@ -92,7 +92,7 @@ export function TeamNodeConfig({ node, onUpdate }: TeamNodeConfigProps) {
           <Label className="text-sm font-medium">Tempo Resposta (min)</Label>
           <Input
             type="number"
-            value={config.responseTime}
+            value={config.responseTime as number}
             onChange={(e) => updateConfig("responseTime", parseInt(e.target.value) || 0)}
             className="mt-2"
             min={1}
@@ -110,7 +110,7 @@ export function TeamNodeConfig({ node, onUpdate }: TeamNodeConfigProps) {
             <Label className="text-sm font-medium">Notificações</Label>
           </div>
           <Checkbox
-            checked={config.enableNotifications}
+            checked={config.enableNotifications as boolean}
             onCheckedChange={(checked) => updateConfig("enableNotifications", checked)}
           />
         </div>
@@ -120,7 +120,7 @@ export function TeamNodeConfig({ node, onUpdate }: TeamNodeConfigProps) {
             <Label className="text-sm font-medium">Coletar Métricas</Label>
           </div>
           <Checkbox
-            checked={config.enableMetrics}
+            checked={config.enableMetrics as boolean}
             onCheckedChange={(checked) => updateConfig("enableMetrics", checked)}
           />
         </div>

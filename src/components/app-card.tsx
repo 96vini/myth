@@ -1,8 +1,14 @@
 import { Card } from "./ui/card";
+import { cn } from "@/lib/utils";
 
-export function AppCard({ children }: { children: React.ReactNode }) {
+export function AppCard({ children, className }: { children: React.ReactNode; className?: string }) {
   return (
-    <Card className="w-full hover:shadow-md hover:shadow-primary/5 border border-secondary/80 h-full bg-background rounded-lg p-5">
+    <Card className={cn(
+      "w-full h-full bg-background/70 border border-border/60 rounded-xl p-5 md:p-6",
+      "card-transition",
+      "hover:border-border hover:bg-background/80",
+      className
+    )}>
       {children}
     </Card>
   )

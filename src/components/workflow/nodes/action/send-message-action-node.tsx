@@ -1,28 +1,28 @@
 "use client"
 
-import { useState, useEffect, useRef } from "react"
+import { useState, useEffect, useRef, memo } from "react"
 import { Handle, Position, NodeProps, useReactFlow } from "@xyflow/react"
 import { cn } from "@/lib/utils"
 import { Send } from "lucide-react"
 import type { ActionNodeData } from "../../types/node.types"
 
-export function SendMessageActionNode({ id, data, selected }: NodeProps<ActionNodeData>) {
-  const [isEditing, setIsEditing] = useState(data.isEditing || false)
-  const [label, setLabel] = useState(data.label || "Enviar Mensagem")
+function SendMessageActionNodeComponent({ id, data, selected }: NodeProps) {
+  const [isEditing, setIsEditing] = useState((data?.isEditing as boolean) || false)
+  const [label, setLabel] = useState((data?.label as string) || "Enviar Mensagem")
   const inputRef = useRef<HTMLInputElement>(null)
   const { updateNodeData } = useReactFlow()
 
   useEffect(() => {
-    if (data.label !== undefined) {
-      setLabel(data.label)
+    if (data?.label !== undefined) {
+      setLabel(data.label as string)
     }
-  }, [data.label])
+  }, [data?.label])
 
   useEffect(() => {
-    if (data.isEditing !== undefined) {
-      setIsEditing(data.isEditing)
+    if (data?.isEditing !== undefined) {
+      setIsEditing(data.isEditing as boolean)
     }
-  }, [data.isEditing])
+  }, [data?.isEditing])
 
   useEffect(() => {
     if (isEditing && inputRef.current) {
@@ -40,7 +40,7 @@ export function SendMessageActionNode({ id, data, selected }: NodeProps<ActionNo
     setIsEditing(false)
     updateNodeData(id, {
       ...data,
-      label: label.trim() || "Enviar Mensagem",
+      label: (label as string).trim() || "Enviar Mensagem",
       isEditing: false,
     })
   }
@@ -51,7 +51,7 @@ export function SendMessageActionNode({ id, data, selected }: NodeProps<ActionNo
       handleBlur()
     }
     if (e.key === "Escape") {
-      setLabel(data.label || "Enviar Mensagem")
+      setLabel((data?.label as string) || "Enviar Mensagem")
       setIsEditing(false)
       updateNodeData(id, { ...data, isEditing: false })
     }
@@ -60,10 +60,15 @@ export function SendMessageActionNode({ id, data, selected }: NodeProps<ActionNo
   return (
     <div
       className={cn(
-        "px-4 py-3 shadow-md rounded-lg border-2 min-w-[150px] bg-card relative",
-        selected ? "border-blue-500 shadow-lg" : "border-border"
+        "px-4 py-3 rounded-lg border-2 min-w-[150px] bg-card relative select-none",
+        selected ? "border-blue-500" : "border-border"
       )}
       onDoubleClick={handleDoubleClick}
+      style={{ 
+        boxShadow: selected ? "0 4px 6px -1px rgba(0, 0, 0, 0.1)" : "none",
+        transition: "none",
+        willChange: "auto"
+      }}
     >
       <div className="absolute -top-2 left-1/2 -translate-x-1/2">
         <div className="bg-blue-500 text-white text-xs px-2 py-0.5 rounded-full flex items-center gap-1">
@@ -76,7 +81,7 @@ export function SendMessageActionNode({ id, data, selected }: NodeProps<ActionNo
         <input
           ref={inputRef}
           type="text"
-          value={label}
+          value={label as string}
           onChange={(e) => setLabel(e.target.value)}
           onBlur={handleBlur}
           onKeyDown={handleKeyDown}
@@ -92,4 +97,6 @@ export function SendMessageActionNode({ id, data, selected }: NodeProps<ActionNo
     </div>
   )
 }
+
+export const SendMessageActionNode = memo(SendMessageActionNodeComponent)
 

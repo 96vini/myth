@@ -6,21 +6,21 @@ import { cn } from "@/lib/utils"
 import { Globe } from "lucide-react"
 import type { OriginNodeData } from "../types/sales-flow.types"
 
-export function OriginNode({ id, data, selected }: NodeProps<OriginNodeData>) {
-  const [isEditing, setIsEditing] = useState(data.isEditing || false)
-  const [label, setLabel] = useState(data.label || "Origem")
+export function OriginNode({ id, data, selected }: NodeProps) {
+  const [isEditing, setIsEditing] = useState((data?.isEditing as boolean) || false)
+  const [label, setLabel] = useState((data?.label as string) || "Origem")
   const inputRef = useRef<HTMLInputElement>(null)
   const { updateNodeData } = useReactFlow()
 
   useEffect(() => {
-    if (data.label !== undefined) {
-      setLabel(data.label)
+    if (data?.label !== undefined) {
+      setLabel(data.label as string)
     }
   }, [data.label])
 
   useEffect(() => {
-    if (data.isEditing !== undefined) {
-      setIsEditing(data.isEditing)
+    if (data?.isEditing !== undefined) {
+      setIsEditing(data.isEditing as boolean)
     }
   }, [data.isEditing])
 
@@ -40,7 +40,7 @@ export function OriginNode({ id, data, selected }: NodeProps<OriginNodeData>) {
     setIsEditing(false)
     updateNodeData(id, {
       ...data,
-      label: label.trim() || "Origem",
+      label: (label as string).trim() || "Origem",
       isEditing: false,
     })
   }
@@ -51,7 +51,7 @@ export function OriginNode({ id, data, selected }: NodeProps<OriginNodeData>) {
       handleBlur()
     }
     if (e.key === "Escape") {
-      setLabel(data.label || "Origem")
+      setLabel((data?.label as string) || "Origem")
       setIsEditing(false)
       updateNodeData(id, { ...data, isEditing: false })
     }
@@ -75,7 +75,7 @@ export function OriginNode({ id, data, selected }: NodeProps<OriginNodeData>) {
         <input
           ref={inputRef}
           type="text"
-          value={label}
+          value={label as string}
           onChange={(e) => setLabel(e.target.value)}
           onBlur={handleBlur}
           onKeyDown={handleKeyDown}

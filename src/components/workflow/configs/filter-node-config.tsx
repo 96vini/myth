@@ -17,11 +17,11 @@ interface FilterNodeConfigProps {
 
 export function FilterNodeConfig({ node, onUpdate }: FilterNodeConfigProps) {
   const [config, setConfig] = useState({
-    filterType: node.data?.filterType || "score",
-    condition: node.data?.condition || "greater",
-    value: node.data?.value || 60,
-    enableMultiple: node.data?.enableMultiple ?? false,
-    filters: node.data?.filters || [],
+    filterType: (node.data?.filterType as string) || "score",
+    condition: (node.data?.condition as string) || "greater",
+    value: (node.data?.value as number) || 60,
+    enableMultiple: (node.data?.enableMultiple as boolean) ?? false,
+    filters: (node.data?.filters as any[]) || [],
   })
 
   const updateConfig = (key: string, value: any) => {
@@ -50,7 +50,7 @@ export function FilterNodeConfig({ node, onUpdate }: FilterNodeConfigProps) {
     <div className="space-y-4">
       <div>
         <Label className="text-sm font-medium">Tipo de Filtro</Label>
-        <Select value={config.filterType} onValueChange={(v) => updateConfig("filterType", v)}>
+        <Select value={config.filterType as string} onValueChange={(v) => updateConfig("filterType", v)}>
           <SelectTrigger className="mt-2">
             <SelectValue />
           </SelectTrigger>
@@ -69,7 +69,7 @@ export function FilterNodeConfig({ node, onUpdate }: FilterNodeConfigProps) {
 
       <div>
         <Label className="text-sm font-medium">Condição</Label>
-        <Select value={config.condition} onValueChange={(v) => updateConfig("condition", v)}>
+        <Select value={config.condition as string} onValueChange={(v) => updateConfig("condition", v)}>
           <SelectTrigger className="mt-2">
             <SelectValue />
           </SelectTrigger>
@@ -88,7 +88,7 @@ export function FilterNodeConfig({ node, onUpdate }: FilterNodeConfigProps) {
           <Label className="text-sm font-medium">Valor</Label>
           <Input
             type="number"
-            value={config.value}
+            value={config.value as number}
             onChange={(e) => updateConfig("value", parseInt(e.target.value) || 0)}
             className="mt-2"
             min={0}
@@ -122,7 +122,7 @@ export function FilterNodeConfig({ node, onUpdate }: FilterNodeConfigProps) {
           <Label className="text-sm font-medium">Valor Estimado (R$)</Label>
           <Input
             type="number"
-            value={config.value}
+            value={config.value as number}
             onChange={(e) => updateConfig("value", parseFloat(e.target.value) || 0)}
             className="mt-2"
             min={0}
@@ -136,7 +136,7 @@ export function FilterNodeConfig({ node, onUpdate }: FilterNodeConfigProps) {
           <Label className="text-sm font-medium">Dias desde o contato</Label>
           <Input
             type="number"
-            value={config.value}
+            value={config.value as number}
             onChange={(e) => updateConfig("value", parseInt(e.target.value) || 0)}
             className="mt-2"
             min={0}
@@ -169,7 +169,7 @@ export function FilterNodeConfig({ node, onUpdate }: FilterNodeConfigProps) {
           <Label className="text-sm font-medium">Múltiplos Filtros</Label>
         </div>
         <Checkbox
-          checked={config.enableMultiple}
+          checked={config.enableMultiple as boolean}
           onCheckedChange={(checked) => updateConfig("enableMultiple", checked)}
         />
       </div>

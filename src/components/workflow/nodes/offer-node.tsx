@@ -6,21 +6,21 @@ import { cn } from "@/lib/utils"
 import { Gift } from "lucide-react"
 import type { OfferNodeData } from "../types/sales-flow.types"
 
-export function OfferNode({ id, data, selected }: NodeProps<OfferNodeData>) {
-  const [isEditing, setIsEditing] = useState(data.isEditing || false)
-  const [label, setLabel] = useState(data.label || "Oferta")
+export function OfferNode({ id, data, selected }: NodeProps) {
+  const [isEditing, setIsEditing] = useState((data?.isEditing as boolean) || false)
+  const [label, setLabel] = useState((data?.label as string) || "Oferta")
   const inputRef = useRef<HTMLInputElement>(null)
   const { updateNodeData } = useReactFlow()
 
   useEffect(() => {
-    if (data.label !== undefined) {
-      setLabel(data.label)
+    if (data?.label !== undefined) {
+      setLabel(data.label as string)
     }
   }, [data.label])
 
   useEffect(() => {
-    if (data.isEditing !== undefined) {
-      setIsEditing(data.isEditing)
+    if (data?.isEditing !== undefined) {
+      setIsEditing(data.isEditing as boolean)
     }
   }, [data.isEditing])
 
@@ -40,7 +40,7 @@ export function OfferNode({ id, data, selected }: NodeProps<OfferNodeData>) {
     setIsEditing(false)
     updateNodeData(id, {
       ...data,
-      label: label.trim() || "Oferta",
+      label: (label as string).trim() || "Oferta",
       isEditing: false,
     })
   }
@@ -51,7 +51,7 @@ export function OfferNode({ id, data, selected }: NodeProps<OfferNodeData>) {
       handleBlur()
     }
     if (e.key === "Escape") {
-      setLabel(data.label || "Oferta")
+      setLabel((data?.label as string) || "Oferta")
       setIsEditing(false)
       updateNodeData(id, { ...data, isEditing: false })
     }
@@ -76,7 +76,7 @@ export function OfferNode({ id, data, selected }: NodeProps<OfferNodeData>) {
         <input
           ref={inputRef}
           type="text"
-          value={label}
+          value={label as string}
           onChange={(e) => setLabel(e.target.value)}
           onBlur={handleBlur}
           onKeyDown={handleKeyDown}

@@ -1,11 +1,10 @@
 "use client"
 
-import { useState, useCallback, useEffect, useRef } from "react"
+import { useState, useCallback, useEffect, useRef, useMemo } from "react"
 import {
   ReactFlow,
   Background,
   Controls,
-  MiniMap,
   Node,
   Edge,
   Connection,
@@ -149,14 +148,25 @@ function FlowContent({
     let animationFrameId: number | null = null
     let lastViewport = getViewport()
 
-    const updateMenuPosition = () => {
+    let lastUpdateTime = 0
+    const THROTTLE_MS = 50 // Aumentar throttle para melhor performance
+
+    const updateMenuPosition = (currentTime: number = 0) => {
+      // Throttle mais agressivo para reduzir chamadas durante drag
+      if (currentTime > 0 && currentTime - lastUpdateTime < THROTTLE_MS) {
+        animationFrameId = requestAnimationFrame(updateMenuPosition)
+        return
+      }
+      
+      if (currentTime > 0) lastUpdateTime = currentTime
+      
       const currentViewport = getViewport()
       
-      // Verificar se houve mudança no viewport
+      // Verificar se houve mudança significativa no viewport (threshold maior)
       const viewportChanged = 
-        lastViewport.x !== currentViewport.x ||
-        lastViewport.y !== currentViewport.y ||
-        lastViewport.zoom !== currentViewport.zoom
+        Math.abs(lastViewport.x - currentViewport.x) > 2 ||
+        Math.abs(lastViewport.y - currentViewport.y) > 2 ||
+        Math.abs(lastViewport.zoom - currentViewport.zoom) > 0.02
 
       if (viewportChanged) {
         if (contextMenu && contextMenuInitialPosRef.current) {
@@ -266,12 +276,34 @@ function FlowContent({
     setNodeCounter((prev: number) => prev + 1)
   }, [nodeCounter, setNodes, getViewport, setNodeCounter])
 
-  const nodeColor = (node: Node) => {
-    return node.selected ? "hsl(var(--primary))" : "hsl(var(--muted-foreground))"
-  }
+  // Encontrar nó selecionado (memoizado)
+  const selectedNode = useMemo(() => nodes.find((n: Node) => n.selected) || null, [nodes])
+  
+  // Memoizar nodeTypes para evitar recriação
+  const memoizedNodeTypes = useMemo(() => ({
+    default: CustomNode,
+    team: CustomNode,
+    lead: CustomNode,
+    message: CustomNode,
+    bot: CustomNode,
+    filter: CustomNode,
+    action: CustomNode,
+    origin: OriginNode,
+    if: DecisionNode,
+  }), [])
 
-  // Encontrar nó selecionado
-  const selectedNode = nodes.find((n: Node) => n.selected) || null
+  // Memoizar edgeTypes
+  const memoizedEdgeTypes = useMemo(() => ({
+    default: EdgeLabel,
+  }), [])
+
+  // Memoizar defaultEdgeOptions
+  const memoizedDefaultEdgeOptions = useMemo(() => ({
+    type: edgeType,
+    animated: false,
+    style: { stroke: "hsl(var(--primary))", strokeWidth: 2 },
+    markerEnd: { type: markerType, color: "hsl(var(--primary))" },
+  }), [edgeType, markerType])
 
   // Handler para atualizar dados do nó
   const handleUpdateNode = useCallback(
@@ -301,7 +333,7 @@ function FlowContent({
         onZoomOut={handleZoomOut}
         onFitView={handleFitView}
         onDeleteSelected={handleDeleteSelected}
-        hasSelectedNodes={nodes.some((n: Node) => n.selected)}
+        hasSelectedNodes={useMemo(() => nodes.some((n: Node) => n.selected), [nodes])}
       />
 
       <div ref={reactFlowWrapperRef} className="w-full h-full">
@@ -314,54 +346,46 @@ function FlowContent({
           onNodeContextMenu={handleNodeContextMenu}
           onEdgeContextMenu={handleEdgeContextMenu}
           onPaneContextMenu={handlePaneContextMenu}
-          fitView
-          nodeTypes={{
-            default: CustomNode,
-            team: CustomNode,
-            lead: CustomNode,
-            message: CustomNode,
-            bot: CustomNode,
-            filter: CustomNode,
-            action: CustomNode,
-            origin: OriginNode,
-            if: DecisionNode,
+          fitView={false}
+          fitViewOptions={{
+            padding: 0.2,
+            minZoom: 0.5,
+            maxZoom: 1.2,
           }}
-          edgeTypes={{
-            default: EdgeLabel,
-          }}
+          defaultViewport={{ x: 0, y: 0, zoom: 0.8 }}
+          nodeTypes={memoizedNodeTypes}
+          edgeTypes={memoizedEdgeTypes}
           className="bg-gradient-to-br from-background via-background to-muted/20"
           connectionLineStyle={{ stroke: "hsl(var(--primary))", strokeWidth: 2 }}
-          defaultEdgeOptions={{
-            type: edgeType,
-            animated: true,
-            style: { stroke: "hsl(var(--primary))", strokeWidth: 2 },
-            markerEnd: { type: markerType, color: "hsl(var(--primary))" },
-          }}
+          defaultEdgeOptions={memoizedDefaultEdgeOptions}
           deleteKeyCode="Delete"
           multiSelectionKeyCode="Shift"
           nodesConnectable={true}
           elementsSelectable={true}
           panOnScroll={true}
           panOnScrollSpeed={1}
+          nodesDraggable={true}
+          nodesFocusable={false}
+          elevateNodesOnSelect={false}
+          onlyRenderVisibleElements={true}
+          nodeOrigin={[0.5, 0.5]}
+          snapToGrid={false}
+          snapGrid={[15, 15]}
           zoomOnScroll={false}
-          zoomOnPinch={true}
+          zoomOnPinch={false}
           zoomOnDoubleClick={false}
           preventScrolling={false}
+          selectNodesOnDrag={false}
+          connectionRadius={20}
+          minZoom={0.3}
+          maxZoom={1.5}
           style={{ width: "100%", height: "100%" }}
         >
           <Background
-            color="hsl(var(--black) / 0.1)"
-            gap={20}
+            color="hsl(var(--border) / 0.3)"
+            gap={40}
             size={1}
-          />
-          <Controls
-            showInteractive={false}
-          />
-          <MiniMap
-            nodeColor={nodeColor}
-            nodeStrokeWidth={3}
-            className="bg-background/80 backdrop-blur-sm border-border/50 rounded-xl shadow-lg"
-            maskColor="hsl(var(--black) / 0.3)"
+            style={{ pointerEvents: "none" }}
           />
         </ReactFlow>
       </div>
@@ -569,7 +593,7 @@ export default function PlansPage() {
         ...params,
         id: `e${params.source}-${params.target}-${Date.now()}`,
         type: edgeType,
-        animated: true,
+        animated: false,
         style: { stroke: edgeColor, strokeWidth: 2 },
         markerEnd: { type: markerType, color: edgeColor },
         data: {
@@ -586,11 +610,11 @@ export default function PlansPage() {
 
 
   const handleDeleteSelected = useCallback(() => {
+    const selectedNodeIds = new Set(nodes.filter((n) => n.selected).map((n) => n.id))
     setNodes((nds) => nds.filter((node) => !node.selected))
     setEdges((eds) =>
       eds.filter(
-        (edge) =>
-          !nodes.find((n) => n.selected && (n.id === edge.source || n.id === edge.target))
+        (edge) => !selectedNodeIds.has(edge.source) && !selectedNodeIds.has(edge.target)
       )
     )
   }, [nodes, setNodes, setEdges])
@@ -843,72 +867,92 @@ export default function PlansPage() {
   return (
     <ReactFlowProvider>
       <div className="w-full h-[calc(100vh-4rem)] relative flex flex-col">
-        {/* Top Bar */}
-        <div className="flex items-center justify-between p-4 border-b bg-background/95 backdrop-blur-xl z-40">
-          <div className="flex items-center gap-4 flex-1">
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => setShowWorkflowList(!showWorkflowList)}
-              className="gap-2"
-            >
-              <List className="h-4 w-4" />
-              Workflows
-            </Button>
-            {workflows.length > 0 && (
-              <Select
-                value={currentWorkflowId || ""}
-                onValueChange={handleLoadWorkflow}
+        {/* Workflow Dock */}
+        <div className="absolute top-4 left-1/2 -translate-x-1/2 z-30 flex items-center gap-2">
+          {/* Connection line to main dock */}
+          <div className="absolute -top-16 left-1/2 -translate-x-1/2 w-px h-12 bg-gradient-to-t from-border/30 to-transparent" />
+          
+          <div className="relative rounded-2xl bg-muted/60 border border-border/60 shadow-xl backdrop-blur-sm transition-all duration-300 hover:shadow-2xl hover:bg-muted/70">
+            <div className="relative flex items-center gap-1.5 px-3 py-2.5">
+              
+              {/* Workflows List Button */}
+              <button
+                onClick={() => setShowWorkflowList(!showWorkflowList)}
+                className="relative z-10 flex items-center justify-center w-11 h-11 rounded-xl transition-all duration-200 ease-out hover:bg-accent/60 hover:scale-110 active:scale-95"
+                title="Workflows"
               >
-                <SelectTrigger className="w-[250px]">
-                  <SelectValue placeholder="Selecione um workflow" />
-                </SelectTrigger>
-                <SelectContent>
-                  {workflows.map((workflow) => (
-                    <SelectItem key={workflow.id} value={workflow.id}>
-                      {workflow.name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            )}
-            <Input
-              placeholder="Nome do workflow"
-              value={workflowName}
-              onChange={(e) => setWorkflowName(e.target.value)}
-              className="max-w-[300px]"
-            />
-          </div>
-          <div className="flex items-center gap-2">
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={handleNewWorkflow}
-              className="gap-2"
-            >
-              <FileText className="h-4 w-4" />
-              Novo
-            </Button>
-            <Button
-              variant="default"
-              size="sm"
-              onClick={handleSaveWorkflow}
-              disabled={isSaving || !workflowName.trim()}
-              className="gap-2 bg-[#23b559] hover:bg-[#23b559]/90"
-            >
-              <Save className="h-4 w-4" />
-              {isSaving ? "Salvando..." : "Salvar"}
-            </Button>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={handleCopyLink}
-              disabled={!currentWorkflowId}
-              className="gap-2"
-            >
-              <Link2 className="h-4 w-4" />
-              Copiar Link
-            </Button>
+                <List className="h-5 w-5 text-foreground/70 hover:text-foreground transition-all duration-200" />
+              </button>
+
+              {/* Separator */}
+              <div className="w-px h-10 bg-border/50 mx-1 transition-opacity duration-300" />
+
+              {/* Workflow Select */}
+              {workflows.length > 0 && (
+                <>
+                  <Select
+                    value={currentWorkflowId || ""}
+                    onValueChange={handleLoadWorkflow}
+                  >
+                    <SelectTrigger className="h-9 w-[180px] md:w-[220px] text-xs transition-all duration-150">
+                      <SelectValue placeholder="Selecione um workflow" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {workflows.map((workflow) => (
+                        <SelectItem key={workflow.id} value={workflow.id}>
+                          {workflow.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  <div className="w-px h-10 bg-border/50 mx-1 transition-opacity duration-300" />
+                </>
+              )}
+
+              {/* Workflow Name Input */}
+              <Input
+                placeholder="Nome do workflow"
+                value={workflowName}
+                onChange={(e) => setWorkflowName(e.target.value)}
+                className="h-9 w-[140px] md:w-[180px] text-xs transition-all duration-150"
+              />
+
+              {/* Separator */}
+              <div className="w-px h-10 bg-border/50 mx-1 transition-opacity duration-300" />
+
+              {/* New Workflow Button */}
+              <button
+                onClick={handleNewWorkflow}
+                className="relative z-10 flex items-center justify-center w-11 h-11 rounded-xl transition-all duration-200 ease-out hover:bg-accent/60 hover:scale-110 active:scale-95"
+                title="Novo workflow"
+              >
+                <FileText className="h-5 w-5 text-foreground/70 hover:text-foreground transition-all duration-200" />
+              </button>
+
+              {/* Save Button */}
+              <button
+                onClick={handleSaveWorkflow}
+                disabled={isSaving || !workflowName.trim()}
+                className="relative z-10 flex items-center justify-center w-11 h-11 rounded-xl transition-all duration-200 ease-out bg-[#23b559] hover:bg-[#23b559]/90 hover:scale-110 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100 shadow-lg"
+                title={isSaving ? "Salvando..." : "Salvar workflow"}
+              >
+                <Save className="h-5 w-5 text-white transition-all duration-200" />
+              </button>
+
+              {/* Copy Link Button */}
+              {currentWorkflowId && (
+                <>
+                  <div className="w-px h-10 bg-border/50 mx-1 transition-opacity duration-300" />
+                  <button
+                    onClick={handleCopyLink}
+                    className="relative z-10 flex items-center justify-center w-11 h-11 rounded-xl transition-all duration-200 ease-out hover:bg-accent/60 hover:scale-110 active:scale-95"
+                    title="Copiar link"
+                  >
+                    <Link2 className="h-5 w-5 text-foreground/70 hover:text-foreground transition-all duration-200" />
+                  </button>
+                </>
+              )}
+            </div>
           </div>
         </div>
 
@@ -916,7 +960,7 @@ export default function PlansPage() {
         {showWorkflowList && (
           <div 
             ref={workflowListRef}
-            className="absolute top-16 left-4 z-50 w-96 max-h-[calc(100vh-12rem)] overflow-y-auto"
+            className="absolute top-20 left-1/2 -translate-x-1/2 z-50 w-[calc(100vw-2rem)] sm:w-96 max-h-[calc(100vh-8rem)] sm:max-h-[calc(100vh-12rem)] overflow-y-auto border border-border bg-background shadow-lg sm:shadow-xl rounded-lg"
           >
             <Card>
               <CardHeader>

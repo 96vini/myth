@@ -17,14 +17,14 @@ interface BotNodeConfigProps {
 
 export function BotNodeConfig({ node, onUpdate }: BotNodeConfigProps) {
   const [config, setConfig] = useState({
-    botType: node.data?.botType || "ai",
-    aiModel: node.data?.aiModel || "gpt-4",
-    responseTime: node.data?.responseTime || 2,
-    enableContext: node.data?.enableContext ?? true,
-    enableLearning: node.data?.enableLearning ?? true,
-    fallbackToHuman: node.data?.fallbackToHuman ?? true,
-    confidenceThreshold: node.data?.confidenceThreshold || 70,
-    maxTurns: node.data?.maxTurns || 5,
+    botType: (node.data?.botType as string) || "ai",
+    aiModel: (node.data?.aiModel as string) || "gpt-4",
+    responseTime: (node.data?.responseTime as number) || 2,
+    enableContext: (node.data?.enableContext as boolean) ?? true,
+    enableLearning: (node.data?.enableLearning as boolean) ?? true,
+    fallbackToHuman: (node.data?.fallbackToHuman as boolean) ?? true,
+    confidenceThreshold: (node.data?.confidenceThreshold as number) || 70,
+    maxTurns: (node.data?.maxTurns as number) || 5,
   })
 
   const updateConfig = (key: string, value: any) => {
@@ -44,7 +44,7 @@ export function BotNodeConfig({ node, onUpdate }: BotNodeConfigProps) {
     <div className="space-y-4">
       <div>
         <Label className="text-sm font-medium">Tipo de Bot</Label>
-        <Select value={config.botType} onValueChange={(v) => updateConfig("botType", v)}>
+        <Select value={config.botType as string} onValueChange={(v) => updateConfig("botType", v)}>
           <SelectTrigger className="mt-2">
             <SelectValue />
           </SelectTrigger>
@@ -63,7 +63,7 @@ export function BotNodeConfig({ node, onUpdate }: BotNodeConfigProps) {
         <>
           <div>
             <Label className="text-sm font-medium">Modelo de IA</Label>
-            <Select value={config.aiModel} onValueChange={(v) => updateConfig("aiModel", v)}>
+            <Select value={config.aiModel as string} onValueChange={(v) => updateConfig("aiModel", v)}>
               <SelectTrigger className="mt-2">
                 <SelectValue />
               </SelectTrigger>
@@ -86,7 +86,7 @@ export function BotNodeConfig({ node, onUpdate }: BotNodeConfigProps) {
             <Label className="text-sm font-medium">Limiar de Confiança (%)</Label>
             <Input
               type="number"
-              value={config.confidenceThreshold}
+              value={config.confidenceThreshold as number}
               onChange={(e) => updateConfig("confidenceThreshold", parseInt(e.target.value) || 0)}
               className="mt-2"
               min={0}
@@ -105,7 +105,7 @@ export function BotNodeConfig({ node, onUpdate }: BotNodeConfigProps) {
         <Label className="text-sm font-medium">Tempo de Resposta (segundos)</Label>
         <Input
           type="number"
-          value={config.responseTime}
+          value={config.responseTime as number}
           onChange={(e) => updateConfig("responseTime", parseInt(e.target.value) || 0)}
           className="mt-2"
           min={0}
@@ -117,7 +117,7 @@ export function BotNodeConfig({ node, onUpdate }: BotNodeConfigProps) {
         <Label className="text-sm font-medium">Máximo de Turnos</Label>
         <Input
           type="number"
-          value={config.maxTurns}
+          value={config.maxTurns as number}
           onChange={(e) => updateConfig("maxTurns", parseInt(e.target.value) || 0)}
           className="mt-2"
           min={1}
@@ -137,7 +137,7 @@ export function BotNodeConfig({ node, onUpdate }: BotNodeConfigProps) {
             <Label className="text-sm font-medium">Usar Contexto</Label>
           </div>
           <Checkbox
-            checked={config.enableContext}
+            checked={config.enableContext as boolean}
             onCheckedChange={(checked) => updateConfig("enableContext", checked)}
           />
         </div>
@@ -151,7 +151,7 @@ export function BotNodeConfig({ node, onUpdate }: BotNodeConfigProps) {
             <Label className="text-sm font-medium">Aprendizado Contínuo</Label>
           </div>
           <Checkbox
-            checked={config.enableLearning}
+            checked={config.enableLearning as boolean}
             onCheckedChange={(checked) => updateConfig("enableLearning", checked)}
           />
         </div>
@@ -165,7 +165,7 @@ export function BotNodeConfig({ node, onUpdate }: BotNodeConfigProps) {
             <Label className="text-sm font-medium">Fallback para Humano</Label>
           </div>
           <Checkbox
-            checked={config.fallbackToHuman}
+            checked={config.fallbackToHuman as boolean}
             onCheckedChange={(checked) => updateConfig("fallbackToHuman", checked)}
           />
         </div>

@@ -6,21 +6,21 @@ import { cn } from "@/lib/utils"
 import { CheckCircle } from "lucide-react"
 import type { SaleNodeData } from "../types/sales-flow.types"
 
-export function SaleNode({ id, data, selected }: NodeProps<SaleNodeData>) {
-  const [isEditing, setIsEditing] = useState(data.isEditing || false)
-  const [label, setLabel] = useState(data.label || "Venda")
+export function SaleNode({ id, data, selected }: NodeProps) {
+  const [isEditing, setIsEditing] = useState((data?.isEditing as boolean) || false)
+  const [label, setLabel] = useState((data?.label as string) || "Venda")
   const inputRef = useRef<HTMLInputElement>(null)
   const { updateNodeData } = useReactFlow()
 
   useEffect(() => {
-    if (data.label !== undefined) {
-      setLabel(data.label)
+    if (data?.label !== undefined) {
+      setLabel(data.label as string)
     }
   }, [data.label])
 
   useEffect(() => {
-    if (data.isEditing !== undefined) {
-      setIsEditing(data.isEditing)
+    if (data?.isEditing !== undefined) {
+      setIsEditing(data.isEditing as boolean)
     }
   }, [data.isEditing])
 
@@ -40,7 +40,7 @@ export function SaleNode({ id, data, selected }: NodeProps<SaleNodeData>) {
     setIsEditing(false)
     updateNodeData(id, {
       ...data,
-      label: label.trim() || "Venda",
+      label: (label as string).trim() || "Venda",
       isEditing: false,
     })
   }
@@ -51,7 +51,7 @@ export function SaleNode({ id, data, selected }: NodeProps<SaleNodeData>) {
       handleBlur()
     }
     if (e.key === "Escape") {
-      setLabel(data.label || "Venda")
+      setLabel((data?.label as string) || "Venda")
       setIsEditing(false)
       updateNodeData(id, { ...data, isEditing: false })
     }
@@ -76,7 +76,7 @@ export function SaleNode({ id, data, selected }: NodeProps<SaleNodeData>) {
         <input
           ref={inputRef}
           type="text"
-          value={label}
+          value={label as string}
           onChange={(e) => setLabel(e.target.value)}
           onBlur={handleBlur}
           onKeyDown={handleKeyDown}

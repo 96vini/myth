@@ -17,11 +17,11 @@ interface ActionNodeConfigProps {
 
 export function ActionNodeConfig({ node, onUpdate }: ActionNodeConfigProps) {
   const [config, setConfig] = useState({
-    actionType: node.data?.actionType || "tag",
-    actionValue: node.data?.actionValue || "",
-    enableNotification: node.data?.enableNotification ?? true,
-    enableLogging: node.data?.enableLogging ?? true,
-    delay: node.data?.delay || 0,
+    actionType: (node.data?.actionType as string) || "tag",
+    actionValue: (node.data?.actionValue as string) || "",
+    enableNotification: (node.data?.enableNotification as boolean) ?? true,
+    enableLogging: (node.data?.enableLogging as boolean) ?? true,
+    delay: (node.data?.delay as number) || 0,
   })
 
   const updateConfig = (key: string, value: any) => {
@@ -43,7 +43,7 @@ export function ActionNodeConfig({ node, onUpdate }: ActionNodeConfigProps) {
     <div className="space-y-4">
       <div>
         <Label className="text-sm font-medium">Tipo de Ação</Label>
-        <Select value={config.actionType} onValueChange={(v) => updateConfig("actionType", v)}>
+        <Select value={config.actionType as string} onValueChange={(v: string) => updateConfig("actionType", v)}>
           <SelectTrigger className="mt-2">
             <SelectValue />
           </SelectTrigger>
@@ -87,8 +87,24 @@ export function ActionNodeConfig({ node, onUpdate }: ActionNodeConfigProps) {
           <Label className="text-sm font-medium">Novo Score</Label>
           <Input
             type="number"
-            value={config.actionValue}
-            onChange={(e) => updateConfig("actionValue", parseInt(e.target.value) || 0)}
+            value={
+              config.actionValue === undefined ||
+              config.actionValue === null ||
+              config.actionValue === ""
+                ? ""
+                : String(config.actionValue)
+            }
+            onChange={(e) => {
+              const v = e.target.value;
+              // Accept empty to allow erasing input
+              if (v === "") {
+                updateConfig("actionValue", "");
+              } else {
+                // Clamp value 0-100, only integers
+                const num = Math.max(0, Math.min(100, Number(v)));
+                updateConfig("actionValue", Number.isNaN(num) ? "" : num);
+              }
+            }}
             className="mt-2"
             min={0}
             max={100}
@@ -122,8 +138,24 @@ export function ActionNodeConfig({ node, onUpdate }: ActionNodeConfigProps) {
           <Label className="text-sm font-medium">Dias para Agendar</Label>
           <Input
             type="number"
-            value={config.actionValue}
-            onChange={(e) => updateConfig("actionValue", parseInt(e.target.value) || 0)}
+            value={
+              config.actionValue === undefined ||
+              config.actionValue === null ||
+              config.actionValue === ""
+                ? ""
+                : String(config.actionValue)
+            }
+            onChange={(e) => {
+              const v = e.target.value;
+              // Allow the input to be cleared
+              if (v === "") {
+                updateConfig("actionValue", "");
+              } else {
+                // Clamp value 0-365, only integers
+                const num = Math.max(0, Math.min(365, Number(v)));
+                updateConfig("actionValue", Number.isNaN(num) ? "" : num);
+              }
+            }}
             className="mt-2"
             min={0}
             max={365}
@@ -139,8 +171,24 @@ export function ActionNodeConfig({ node, onUpdate }: ActionNodeConfigProps) {
           <Label className="text-sm font-medium">Valor Estimado (R$)</Label>
           <Input
             type="number"
-            value={config.actionValue}
-            onChange={(e) => updateConfig("actionValue", parseFloat(e.target.value) || 0)}
+            value={
+              config.actionValue === undefined ||
+              config.actionValue === null ||
+              config.actionValue === ""
+                ? ""
+                : String(config.actionValue)
+            }
+            onChange={(e) => {
+              const v = e.target.value;
+              // Allow the input to be cleared
+              if (v === "") {
+                updateConfig("actionValue", "");
+              } else {
+                // Clamp value to positive numbers
+                const num = Math.max(0, Number(v));
+                updateConfig("actionValue", Number.isNaN(num) ? "" : num);
+              }
+            }}
             className="mt-2"
             min={0}
             step={0.01}
@@ -152,8 +200,22 @@ export function ActionNodeConfig({ node, onUpdate }: ActionNodeConfigProps) {
         <div>
           <Label className="text-sm font-medium">Nota</Label>
           <Input
-            value={config.actionValue}
-            onChange={(e) => updateConfig("actionValue", e.target.value)}
+            value={
+              config.actionValue === undefined ||
+              config.actionValue === null ||
+              config.actionValue === ""
+                ? ""
+                : String(config.actionValue)
+            }
+            onChange={(e) => {
+              const v = e.target.value;
+              // Allow the input to be cleared
+              if (v === "") {
+                updateConfig("actionValue", "");
+              } else {
+                updateConfig("actionValue", v);
+              }
+            }}
             className="mt-2"
             placeholder="Digite a nota..."
           />
@@ -166,8 +228,24 @@ export function ActionNodeConfig({ node, onUpdate }: ActionNodeConfigProps) {
         <Label className="text-sm font-medium">Atraso (segundos)</Label>
         <Input
           type="number"
-          value={config.delay}
-          onChange={(e) => updateConfig("delay", parseInt(e.target.value) || 0)}
+            value={
+            config.delay === undefined ||
+            config.delay === null ||
+            config.delay === 0
+              ? ""
+              : String(config.delay)
+          }
+          onChange={(e) => {
+            const v = e.target.value;
+            // Allow the input to be cleared
+            if (v === "") {
+              updateConfig("delay", "");
+            } else {
+              // Clamp value 0-300, only integers
+              const num = Math.max(0, Math.min(300, Number(v)));
+              updateConfig("delay", Number.isNaN(num) ? "" : num);
+            }
+          }}
           className="mt-2"
           min={0}
           max={300}
@@ -186,8 +264,10 @@ export function ActionNodeConfig({ node, onUpdate }: ActionNodeConfigProps) {
             <Label className="text-sm font-medium">Notificar Equipe</Label>
           </div>
           <Checkbox
-            checked={config.enableNotification}
-            onCheckedChange={(checked) => updateConfig("enableNotification", checked)}
+            checked={!!config.enableNotification}
+            onCheckedChange={(checked) =>
+              updateConfig("enableNotification", checked === true)
+            }
           />
         </div>
 
@@ -197,8 +277,10 @@ export function ActionNodeConfig({ node, onUpdate }: ActionNodeConfigProps) {
             <Label className="text-sm font-medium">Registrar no Log</Label>
           </div>
           <Checkbox
-            checked={config.enableLogging}
-            onCheckedChange={(checked) => updateConfig("enableLogging", checked)}
+            checked={!!config.enableLogging}
+            onCheckedChange={(checked) =>
+              updateConfig("enableLogging", checked === true)
+            }
           />
         </div>
         <p className="text-xs text-muted-foreground ml-6">

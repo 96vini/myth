@@ -90,7 +90,7 @@ export class LeadPayloadFactory {
       tags.push(`priority:${data.priority}`)
     }
 
-    return [...new Set(tags)]
+    return Array.from(new Set(tags))
   }
 
   static normalize(payload: Partial<LeadPayload>): LeadPayload {

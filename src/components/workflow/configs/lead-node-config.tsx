@@ -17,14 +17,14 @@ interface LeadNodeConfigProps {
 
 export function LeadNodeConfig({ node, onUpdate }: LeadNodeConfigProps) {
   const [config, setConfig] = useState({
-    leadSource: node.data?.leadSource || "whatsapp",
-    qualification: node.data?.qualification || "auto",
-    minScore: node.data?.minScore || 60,
-    tags: node.data?.tags || [],
-    enableScoring: node.data?.enableScoring ?? true,
-    enableTracking: node.data?.enableTracking ?? true,
-    followUpDays: node.data?.followUpDays || 3,
-    autoAssign: node.data?.autoAssign ?? true,
+    leadSource: (node.data?.leadSource as string) || "whatsapp",
+    qualification: (node.data?.qualification as string) || "auto",
+    minScore: (node.data?.minScore as number) || 60,
+    tags: (node.data?.tags as string[]) || [],
+    enableScoring: (node.data?.enableScoring as boolean) ?? true,
+    enableTracking: (node.data?.enableTracking as boolean) ?? true,
+    followUpDays: (node.data?.followUpDays as number) || 3,
+    autoAssign: (node.data?.autoAssign as boolean) ?? true,
   })
 
   const updateConfig = (key: string, value: any) => {
@@ -51,7 +51,7 @@ export function LeadNodeConfig({ node, onUpdate }: LeadNodeConfigProps) {
     <div className="space-y-4">
       <div>
         <Label className="text-sm font-medium">Origem do Lead</Label>
-        <Select value={config.leadSource} onValueChange={(v) => updateConfig("leadSource", v)}>
+        <Select value={config.leadSource as string} onValueChange={(v) => updateConfig("leadSource", v)}>
           <SelectTrigger className="mt-2">
             <SelectValue />
           </SelectTrigger>
@@ -74,7 +74,7 @@ export function LeadNodeConfig({ node, onUpdate }: LeadNodeConfigProps) {
 
       <div>
         <Label className="text-sm font-medium">Qualificação</Label>
-        <Select value={config.qualification} onValueChange={(v) => updateConfig("qualification", v)}>
+        <Select value={config.qualification as string} onValueChange={(v) => updateConfig("qualification", v)}>
           <SelectTrigger className="mt-2">
             <SelectValue />
           </SelectTrigger>
@@ -94,14 +94,29 @@ export function LeadNodeConfig({ node, onUpdate }: LeadNodeConfigProps) {
           <Label className="text-sm font-medium">Score Mínimo</Label>
           <Input
             type="number"
-            value={config.minScore}
-            onChange={(e) => updateConfig("minScore", parseInt(e.target.value) || 0)}
+            value={
+              typeof config.minScore === "number"
+                ? config.minScore
+                : typeof config.minScore === "string"
+                  ? config.minScore
+                  : ""
+            }
+            onChange={(e) => {
+              const value = e.target.value;
+              // Ensures only string or number is passed, never undefined/object.
+              if (value === "") {
+                updateConfig("minScore", "");
+              } else {
+                const num = Math.max(0, Math.min(100, Number(value)));
+                updateConfig("minScore", isNaN(num) ? 0 : num);
+              }
+            }}
             className="mt-2"
             min={0}
             max={100}
           />
           <p className="text-xs text-muted-foreground mt-1">
-            Leads abaixo deste score serão marcados como "Frio"
+            Leads abaixo deste score serão marcados como &quot;Frio&quot;
           </p>
         </div>
       )}
@@ -115,7 +130,7 @@ export function LeadNodeConfig({ node, onUpdate }: LeadNodeConfigProps) {
             <Label className="text-sm font-medium">Sistema de Pontuação</Label>
           </div>
           <Checkbox
-            checked={config.enableScoring}
+            checked={config.enableScoring as boolean}
             onCheckedChange={(checked) => updateConfig("enableScoring", checked)}
           />
         </div>
@@ -125,7 +140,7 @@ export function LeadNodeConfig({ node, onUpdate }: LeadNodeConfigProps) {
             <Label className="text-sm font-medium">Rastreamento</Label>
           </div>
           <Checkbox
-            checked={config.enableTracking}
+            checked={config.enableTracking as boolean}
             onCheckedChange={(checked) => updateConfig("enableTracking", checked)}
           />
         </div>
@@ -135,7 +150,7 @@ export function LeadNodeConfig({ node, onUpdate }: LeadNodeConfigProps) {
             <Label className="text-sm font-medium">Atribuição Automática</Label>
           </div>
           <Checkbox
-            checked={config.autoAssign}
+            checked={config.autoAssign as boolean}
             onCheckedChange={(checked) => updateConfig("autoAssign", checked)}
           />
         </div>
@@ -170,7 +185,7 @@ export function LeadNodeConfig({ node, onUpdate }: LeadNodeConfigProps) {
         <Label className="text-sm font-medium">Follow-up (dias)</Label>
         <Input
           type="number"
-          value={config.followUpDays}
+          value={config.followUpDays as number}
           onChange={(e) => updateConfig("followUpDays", parseInt(e.target.value) || 0)}
           className="mt-2"
           min={1}
