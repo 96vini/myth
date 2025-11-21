@@ -1,17 +1,25 @@
 "use client"
 
+import { useSession } from "next-auth/react"
 import { Dock } from "@/components/dock"
 import { NavUser } from "@/components/nav-user"
 import Image from "next/image"
 
-const user = {
-  name: "vini",
-  email: "96@thunder.com",
-  avatar: "/avatars/shadcn.jpg",
-}
-
-
 export function AppHeader() {
+  const { data: session } = useSession()
+
+  const user = session?.user
+    ? {
+        name: session.user.name || session.user.email?.split("@")[0] || "Usuário",
+        email: session.user.email || "",
+        avatar: session.user.image || "/avatars/default.jpg",
+      }
+    : {
+        name: "Usuário",
+        email: "",
+        avatar: "/avatars/default.jpg",
+      }
+
   return (
     <header className="sticky top-0 z-50 w-full bg-background/95 backdrop-blur-lg supports-[backdrop-filter]:bg-background/60 shadow-sm">
       <div className="flex h-16 items-center justify-between gap-4 px-4 md:px-6 lg:px-8">
@@ -51,4 +59,3 @@ export function AppHeader() {
     </header>
   )
 }
-

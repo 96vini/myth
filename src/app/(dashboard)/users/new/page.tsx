@@ -80,7 +80,7 @@ export default function NewUserPage() {
     } catch (error) {
       toast.error(error instanceof Error ? error.message : "Erro ao criar usuário")
     } finally {
-      setIsSaving(false)
+    setIsSaving(false)
     }
   }
 
@@ -97,7 +97,7 @@ export default function NewUserPage() {
           >
             <ArrowLeft className="h-4 w-4" />
           </Button>
-          <h1 className="text-2xl md:text-3xl font-semibold text-foreground">Novo usuário</h1>
+            <h1 className="text-2xl md:text-3xl font-semibold text-foreground">Novo usuário</h1>
         </div>
 
         {/* Form Card */}

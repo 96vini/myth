@@ -1,5 +1,7 @@
 "use client"
 
+import { useRouter } from "next/navigation"
+import { signOut } from "next-auth/react"
 import {
   CreditCardIcon,
   LogOutIcon,
@@ -32,6 +34,14 @@ export function NavUser({
     avatar: string
   }
 }) {
+  const router = useRouter()
+
+  const handleSignOut = async () => {
+    await signOut({ redirect: false })
+    router.push("/login")
+    router.refresh()
+  }
+
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
@@ -81,7 +91,10 @@ export function NavUser({
           </DropdownMenuItem>
         </DropdownMenuGroup>
         <DropdownMenuSeparator />
-        <DropdownMenuItem className="cursor-pointer text-destructive focus:text-destructive">
+        <DropdownMenuItem 
+          className="cursor-pointer text-destructive focus:text-destructive"
+          onClick={handleSignOut}
+        >
           <LogOutIcon className="h-4 w-4" />
           Sair
         </DropdownMenuItem>
