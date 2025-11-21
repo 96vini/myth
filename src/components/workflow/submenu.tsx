@@ -18,23 +18,28 @@ export function Submenu({ isOpen, onClose, title, children, className }: Submenu
   return (
     <>
       <div
-        className="fixed inset-0 z-10"
+        className="fixed inset-0 z-10 bg-background/40 backdrop-blur-[2px]"
         onClick={onClose}
       />
-      <Card
-        className={cn(
-          "absolute left-full ml-2 top-0 p-2 bg-background/95 backdrop-blur-xl border-border/50 shadow-xl min-w-[180px] z-20",
-          className
-        )}
-        onClick={(e) => e.stopPropagation()}
+      <div
+        className="pointer-events-none fixed inset-y-0 right-0 z-20 flex items-center justify-center p-4"
+        style={{ left: "var(--sidebar-width, 0px)" }}
       >
-        <div className="flex flex-col gap-1">
-          <div className="px-2 py-1.5 text-xs font-semibold text-muted-foreground">
-            {title}
+        <Card
+          className={cn(
+            "pointer-events-auto w-full max-w-md rounded-2xl border border-border/60 bg-background shadow-2xl p-4",
+            className
+          )}
+          onClick={(e) => e.stopPropagation()}
+        >
+          <div className="flex flex-col gap-1">
+            <div className="px-2 py-1.5 text-xs font-semibold text-muted-foreground">
+              {title}
+            </div>
+            {children}
           </div>
-          {children}
-        </div>
-      </Card>
+        </Card>
+      </div>
     </>
   )
 }

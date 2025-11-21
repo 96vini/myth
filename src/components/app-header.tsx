@@ -27,9 +27,6 @@ export function AppHeader() {
               priority
             />
           </div>
-          <span className="text-sm text-white hidden sm:inline-block">
-            Thunder
-          </span>
         </div>
 
         {/* Center - Dock (Desktop) */}

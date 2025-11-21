@@ -42,21 +42,19 @@ export function NavMain({
                   asChild 
                   tooltip={item.title}
                   className={cn(
-                    "transition-all duration-200",
                     isActive && "bg-sidebar-accent text-sidebar-accent-foreground font-medium"
                   )}
                 >
                   <Link href={item.url} className="flex items-center gap-3">
                     {item.icon && (
                       <item.icon className={cn(
-                        "transition-all",
                         isActive ? "text-sidebar-accent-foreground" : "text-sidebar-foreground/60"
                       )} />
                     )}
                     <span className="flex-1">{item.title}</span>
                     {item.badge && (
                       <span className={cn(
-                        "ml-auto flex h-5 min-w-5 items-center justify-center rounded-full px-1.5 text-xs font-medium transition-colors",
+                        "ml-auto flex h-5 min-w-5 items-center justify-center rounded-full px-1.5 text-xs font-medium",
                         isActive 
                           ? "bg-sidebar-accent-foreground/10 text-sidebar-accent-foreground" 
                           : "bg-sidebar-accent text-sidebar-accent-foreground"

@@ -25,22 +25,22 @@ export function AppFooter() {
             <h3 className="text-sm font-semibold">Links Rápidos</h3>
             <ul className="space-y-2 text-sm text-muted-foreground">
               <li>
-                <Link href="/" className="hover:text-foreground transition-colors">
+                <Link href="/" className="hover:text-foreground">
                   Dashboard
                 </Link>
               </li>
               <li>
-                <Link href="/customers" className="hover:text-foreground transition-colors">
+                <Link href="/customers" className="hover:text-foreground">
                   Clientes
                 </Link>
               </li>
               <li>
-                <Link href="/team" className="hover:text-foreground transition-colors">
+                <Link href="/team" className="hover:text-foreground">
                   Equipe
                 </Link>
               </li>
               <li>
-                <Link href="/plans" className="hover:text-foreground transition-colors">
+                <Link href="/plans" className="hover:text-foreground">
                   Planos
                 </Link>
               </li>
@@ -52,17 +52,17 @@ export function AppFooter() {
             <h3 className="text-sm font-semibold">Suporte</h3>
             <ul className="space-y-2 text-sm text-muted-foreground">
               <li>
-                <a href="#" className="hover:text-foreground transition-colors">
+                <a href="#" className="hover:text-foreground">
                   Ajuda
                 </a>
               </li>
               <li>
-                <a href="#" className="hover:text-foreground transition-colors">
+                <a href="#" className="hover:text-foreground">
                   Documentação
                 </a>
               </li>
               <li>
-                <a href="#" className="hover:text-foreground transition-colors">
+                <a href="#" className="hover:text-foreground">
                   Contato
                 </a>
               </li>

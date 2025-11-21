@@ -12,9 +12,7 @@ export default function DashboardLayout({
 
       {/* Main Content */}
       <main className="flex-1 bg-gradient-to-b from-background via-background to-muted/20">
-        <div className="page-transition">
-          {children}
-        </div>
+        {children}
       </main>
     </div>
   )

@@ -18,6 +18,8 @@ import {
   Calendar1Icon,
   SwordIcon,
   BotIcon,
+  User2,
+  Blocks,
 } from "lucide-react"
 import { cn } from "@/lib/utils"
 
@@ -38,16 +40,22 @@ const dockItems: (DockItem | { id: string; separator: true; icon?: never; label:
     href: "/",
   },
   {
-    id: "workflow",
-    icon: SquareDashedMousePointerIcon,
-    label: "Fluxo",
-    href: "/workflow",
+    id: "team",
+    icon: UsersIcon,
+    label: "Usuários",
+    href: "/users",
   },
   {
-    id: "bots",
-    icon: BotIcon,
-    label: "Bots",
-    href: "/bots",
+    id: "calendar",
+    icon: Calendar,
+    label: "Calendário",
+    href: "/calendar",
+  },
+  {
+    id: "blocks",
+    icon: Blocks,
+    label: "Página",
+    href: "/pages",
   },
   {
     id: "separator",
@@ -135,7 +143,7 @@ function DockComponent() {
 
                   {/* Hover Glow Effect */}
                   {isHovered && !active && (
-                    <div className="absolute inset-0 rounded-xl bg-primary/10 blur-md -z-10 animate-in fade-in-0 zoom-in-95 duration-200" />
+                    <div className="absolute inset-0 rounded-xl blur-md -z-10 animate-in fade-in-0 zoom-in-95 duration-200" />
                   )}
 
                   {/* Icon */}

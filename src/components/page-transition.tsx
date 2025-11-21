@@ -35,19 +35,7 @@ function PageTransitionComponent({ children }: { children: React.ReactNode }) {
 
   return (
     <div className="w-full relative">
-      <div
-        className={cn(
-          "w-full",
-          isExiting && "page-transition-exit"
-        )}
-      >
-        <div className={cn(
-          "w-full",
-          !isExiting && "page-transition"
-        )}>
-          {displayChildren}
-        </div>
-      </div>
+      {displayChildren}
     </div>
   )
 }

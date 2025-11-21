@@ -536,19 +536,7 @@ function FlowContent({
 }
 
 export default function PlansPage() {
-  const [workflows, setWorkflows] = useState<Workflow[]>(() => {
-    if (typeof window !== "undefined") {
-      const stored = localStorage.getItem(STORAGE_KEY)
-      if (stored) {
-        try {
-          return JSON.parse(stored)
-        } catch {
-          return []
-        }
-      }
-    }
-    return []
-  })
+  const [workflows, setWorkflows] = useState<Workflow[]>([])
   const [currentWorkflowId, setCurrentWorkflowId] = useState<string | null>(null)
   const [showWorkflowList, setShowWorkflowList] = useState(false)
   const [nodes, setNodes, onNodesChange] = useNodesState(initialNodes)
@@ -569,6 +557,20 @@ export default function PlansPage() {
   const [selectedTool, setSelectedTool] = useState<string>("select")
   const [workflowName, setWorkflowName] = useState("")
   const [isSaving, setIsSaving] = useState(false)
+
+  useEffect(() => {
+    if (typeof window === "undefined") return
+    const stored = localStorage.getItem(STORAGE_KEY)
+    if (!stored) return
+    try {
+      const parsed = JSON.parse(stored)
+      if (Array.isArray(parsed)) {
+        setWorkflows(parsed)
+      }
+    } catch {
+      // ignore invalid stored data
+    }
+  }, [])
 
   const onConnect = useCallback(
     (params: Connection) => {
@@ -867,92 +869,76 @@ export default function PlansPage() {
   return (
     <ReactFlowProvider>
       <div className="w-full h-[calc(100vh-4rem)] relative flex flex-col">
-        {/* Workflow Dock */}
-        <div className="absolute top-4 left-1/2 -translate-x-1/2 z-30 flex items-center gap-2">
-          {/* Connection line to main dock */}
-          <div className="absolute -top-16 left-1/2 -translate-x-1/2 w-px h-12 bg-gradient-to-t from-border/30 to-transparent" />
-          
-          <div className="relative rounded-2xl bg-muted/60 border border-border/60 shadow-xl backdrop-blur-sm transition-all duration-300 hover:shadow-2xl hover:bg-muted/70">
-            <div className="relative flex items-center gap-1.5 px-3 py-2.5">
-              
-              {/* Workflows List Button */}
-              <button
-                onClick={() => setShowWorkflowList(!showWorkflowList)}
-                className="relative z-10 flex items-center justify-center w-11 h-11 rounded-xl transition-all duration-200 ease-out hover:bg-accent/60 hover:scale-110 active:scale-95"
-                title="Workflows"
-              >
-                <List className="h-5 w-5 text-foreground/70 hover:text-foreground transition-all duration-200" />
-              </button>
+        {/* Workflow Header */}
+        <div className="z-30 w-[80vw] mx-auto mt-3 text-sidebar-foreground shadow-sm">
+          <div className="mx-auto flex w-full max-w-5xl flex-wrap items-center gap-2 px-4 py-3 md:w-[70%]">
+            <button
+              onClick={() => setShowWorkflowList(!showWorkflowList)}
+              className="flex h-11 w-11 items-center justify-center rounded-xl border border-sidebar-border/60 bg-sidebar/40 hover:bg-sidebar-accent/40"
+              title="Workflows"
+            >
+              <List className="h-5 w-5 text-sidebar-foreground/80" />
+            </button>
 
-              {/* Separator */}
-              <div className="w-px h-10 bg-border/50 mx-1 transition-opacity duration-300" />
+            {workflows.length > 0 && (
+              <>
+                <Select
+                  value={currentWorkflowId || ""}
+                  onValueChange={handleLoadWorkflow}
+                >
+                  <SelectTrigger className="h-10 w-[180px] md:w-[220px] border-sidebar-border bg-sidebar/20 text-xs text-sidebar-foreground">
+                    <SelectValue placeholder="Selecione um workflow" />
+                  </SelectTrigger>
+                  <SelectContent className="border-sidebar-border bg-sidebar text-sidebar-foreground">
+                    {workflows.map((workflow) => (
+                      <SelectItem key={workflow.id} value={workflow.id}>
+                        {workflow.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <div className="h-8 w-px bg-sidebar-border/60" />
+              </>
+            )}
 
-              {/* Workflow Select */}
-              {workflows.length > 0 && (
-                <>
-                  <Select
-                    value={currentWorkflowId || ""}
-                    onValueChange={handleLoadWorkflow}
-                  >
-                    <SelectTrigger className="h-9 w-[180px] md:w-[220px] text-xs transition-all duration-150">
-                      <SelectValue placeholder="Selecione um workflow" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {workflows.map((workflow) => (
-                        <SelectItem key={workflow.id} value={workflow.id}>
-                          {workflow.name}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                  <div className="w-px h-10 bg-border/50 mx-1 transition-opacity duration-300" />
-                </>
-              )}
+            <Input
+              placeholder="Nome do workflow"
+              value={workflowName}
+              onChange={(e) => setWorkflowName(e.target.value)}
+              className="h-10 w-[160px] md:w-[220px] border-sidebar-border bg-sidebar/20 text-xs text-sidebar-foreground placeholder:text-sidebar-foreground/60 focus-visible:ring-sidebar-ring"
+            />
 
-              {/* Workflow Name Input */}
-              <Input
-                placeholder="Nome do workflow"
-                value={workflowName}
-                onChange={(e) => setWorkflowName(e.target.value)}
-                className="h-9 w-[140px] md:w-[180px] text-xs transition-all duration-150"
-              />
+            <div className="h-8 w-px bg-sidebar-border/60" />
 
-              {/* Separator */}
-              <div className="w-px h-10 bg-border/50 mx-1 transition-opacity duration-300" />
+            <button
+              onClick={handleNewWorkflow}
+              className="flex h-11 w-11 items-center justify-center rounded-xl border border-sidebar-border/60 bg-sidebar/40 hover:bg-sidebar-accent/40"
+              title="Novo workflow"
+            >
+              <FileText className="h-5 w-5 text-sidebar-foreground/80" />
+            </button>
 
-              {/* New Workflow Button */}
-              <button
-                onClick={handleNewWorkflow}
-                className="relative z-10 flex items-center justify-center w-11 h-11 rounded-xl transition-all duration-200 ease-out hover:bg-accent/60 hover:scale-110 active:scale-95"
-                title="Novo workflow"
-              >
-                <FileText className="h-5 w-5 text-foreground/70 hover:text-foreground transition-all duration-200" />
-              </button>
+            <button
+              onClick={handleSaveWorkflow}
+              disabled={isSaving || !workflowName.trim()}
+              className="flex h-11 w-11 items-center justify-center rounded-xl bg-[#23b559] text-white shadow-lg disabled:cursor-not-allowed disabled:opacity-50"
+              title={isSaving ? "Salvando..." : "Salvar workflow"}
+            >
+              <Save className="h-5 w-5" />
+            </button>
 
-              {/* Save Button */}
-              <button
-                onClick={handleSaveWorkflow}
-                disabled={isSaving || !workflowName.trim()}
-                className="relative z-10 flex items-center justify-center w-11 h-11 rounded-xl transition-all duration-200 ease-out bg-[#23b559] hover:bg-[#23b559]/90 hover:scale-110 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100 shadow-lg"
-                title={isSaving ? "Salvando..." : "Salvar workflow"}
-              >
-                <Save className="h-5 w-5 text-white transition-all duration-200" />
-              </button>
-
-              {/* Copy Link Button */}
-              {currentWorkflowId && (
-                <>
-                  <div className="w-px h-10 bg-border/50 mx-1 transition-opacity duration-300" />
-                  <button
-                    onClick={handleCopyLink}
-                    className="relative z-10 flex items-center justify-center w-11 h-11 rounded-xl transition-all duration-200 ease-out hover:bg-accent/60 hover:scale-110 active:scale-95"
-                    title="Copiar link"
-                  >
-                    <Link2 className="h-5 w-5 text-foreground/70 hover:text-foreground transition-all duration-200" />
-                  </button>
-                </>
-              )}
-            </div>
+            {currentWorkflowId && (
+              <>
+                <div className="h-8 w-px bg-sidebar-border/60" />
+                <button
+                  onClick={handleCopyLink}
+                  className="flex h-11 w-11 items-center justify-center rounded-xl border border-sidebar-border/60 bg-sidebar/40 hover:bg-sidebar-accent/40"
+                  title="Copiar link"
+                >
+                  <Link2 className="h-5 w-5 text-sidebar-foreground/80" />
+                </button>
+              </>
+            )}
           </div>
         </div>
 
@@ -960,7 +946,7 @@ export default function PlansPage() {
         {showWorkflowList && (
           <div 
             ref={workflowListRef}
-            className="absolute top-20 left-1/2 -translate-x-1/2 z-50 w-[calc(100vw-2rem)] sm:w-96 max-h-[calc(100vh-8rem)] sm:max-h-[calc(100vh-12rem)] overflow-y-auto border border-border bg-background shadow-lg sm:shadow-xl rounded-lg"
+            className="absolute top-28 left-1/2 z-50 w-[calc(100vw-2rem)] max-h-[calc(100vh-8rem)] -translate-x-1/2 rounded-lg border border-sidebar-border bg-sidebar text-sidebar-foreground shadow-xl sm:w-96 sm:max-h-[calc(100vh-12rem)]"
           >
             <Card>
               <CardHeader>
@@ -976,7 +962,7 @@ export default function PlansPage() {
                   workflows.map((workflow) => (
                     <div
                       key={workflow.id}
-                      className="flex items-center justify-between p-3 border rounded-lg hover:bg-muted/50 transition-colors"
+                      className="flex items-center justify-between p-3 border rounded-lg hover:bg-muted/50"
                     >
                       <div className="flex-1">
                         <p className="font-medium text-sm">{workflow.name}</p>

@@ -199,7 +199,7 @@ export function FilterNodeConfig({ node, onUpdate }: FilterNodeConfigProps) {
           </div>
           <div className="h-2 bg-muted rounded-full overflow-hidden mt-2">
             <div
-              className="h-full bg-[#23b559] transition-all"
+              className="h-full bg-[#23b559]"
               style={{ width: "78%" }}
             />
           </div>

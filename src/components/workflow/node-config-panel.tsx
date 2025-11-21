@@ -114,7 +114,7 @@ function NodeConfigPanelComponent({ selectedNode, onClose, onUpdateNode }: NodeC
                       handleBotSelect(bot.id)
                     }}
                     className={`
-                      flex-shrink-0 w-[180px] space-y-1 rounded-md p-2 cursor-pointer transition-all select-none touch-none
+                      flex-shrink-0 w-[180px] space-y-1 rounded-md p-2 cursor-pointer select-none touch-none
                       ${isSelected 
                         ? "border-primary border-2 bg-primary/5" 
                         : "border border-border hover:border-primary/50 hover:bg-muted/50"
@@ -147,7 +147,7 @@ function NodeConfigPanelComponent({ selectedNode, onClose, onUpdateNode }: NodeC
                     </div>
                     <div className="h-2 bg-muted rounded-full overflow-hidden">
                       <div
-                        className="h-full bg-[#23b559] transition-all"
+                        className="h-full bg-[#23b559]"
                         style={{ width: `${bot.performance}%` }}
                       />
                     </div>
@@ -212,7 +212,7 @@ function NodeConfigPanelComponent({ selectedNode, onClose, onUpdateNode }: NodeC
                   handleBotSelect(bot.id)
                 }}
                 className={`
-                  flex-shrink-0 w-[180px] space-y-1 rounded-md p-2 cursor-pointer transition-all select-none touch-none
+                  flex-shrink-0 w-[180px] space-y-1 rounded-md p-2 cursor-pointer select-none touch-none
                   ${isSelected 
                     ? "border-primary border-2 bg-primary/5" 
                     : "border border-border hover:border-primary/50 hover:bg-muted/50"
@@ -245,7 +245,7 @@ function NodeConfigPanelComponent({ selectedNode, onClose, onUpdateNode }: NodeC
                 </div>
                 <div className="h-2 bg-muted rounded-full overflow-hidden">
                   <div
-                    className="h-full bg-[#23b559] transition-all"
+                    className="h-full bg-[#23b559]"
                     style={{ width: `${bot.performance}%` }}
                   />
                 </div>
